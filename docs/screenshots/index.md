@@ -1,8 +1,18 @@
 # Screenshots
 
-Visual proof helps people trust the project. Capture these on Apple Silicon after a clean `ducker install` and attach PNGs here before each release.
+Visual PNGs for releases, plus a full **text** command gallery in the [CLI reference](../cli-reference.md).
 
-## Required shots
+## Prefer the CLI reference
+
+For every `ducker` command with **purpose, usage, and simulated terminal output**, see:
+
+**[CLI reference →](../cli-reference.md)**
+
+That page is the source of truth for command documentation (like professional CLI product docs). This page tracks **PNG assets** to attach at release time.
+
+## Required PNG shots
+
+Capture on Apple Silicon after a clean `ducker install`:
 
 | File | Command / view |
 | --- | --- |
@@ -10,6 +20,7 @@ Visual proof helps people trust the project. Capture these on Apple Silicon afte
 | `ducker-doctor.png` | `ducker doctor` |
 | `ducker-status.png` | `ducker status` |
 | `ducker-benchmark.png` | `ducker benchmark` |
+| `ducker-profile-list.png` | `ducker profile list` |
 | `docker-ps.png` | `docker ps` (with a running container) |
 | `ui-dockhand.png` | Dockhand UI (default — `ducker ui open`) |
 | `ui-arcane.png` | Arcane UI in browser |
@@ -17,18 +28,19 @@ Visual proof helps people trust the project. Capture these on Apple Silicon afte
 ## Capture tips
 
 ```bash
-# Terminal (macOS Screenshot → select window, or):
 ducker about
 ducker doctor
 ducker status
 ducker benchmark
+ducker profile list
 
 docker run -d --name demo nginx:alpine
 docker ps
+ducker ui open
 ```
 
 Store PNGs in this directory (`docs/screenshots/`). Keep them under ~500 KB each when possible.
 
 ## Placeholder
 
-Until real captures are committed, this page documents what to add. Do not commit fake marketing mockups that misrepresent the CLI.
+Until real captures are committed, use the [CLI reference](../cli-reference.md) simulated sessions. Do not commit fake marketing mockups that misrepresent the CLI.

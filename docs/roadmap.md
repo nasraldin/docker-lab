@@ -16,8 +16,9 @@ One CLI — `ducker` — bootstraps the local platform stack.
 - [x] Optional UIs (Arcane, Dockhand)
 - [x] Docs split + CI lint/test
 - [x] `benchmark`, `upgrade`, `backup` / `restore`, profiles
-- [ ] Screenshots refreshed each release
-- [ ] Homebrew tap + GitHub Releases automation
+- [x] CLI reference with simulated command + output sessions
+- [x] Homebrew tap (`ducker-lab`) + release workflow
+- [ ] Screenshots (PNG) refreshed each release
 - [ ] `ducker doctor --fix` coverage expansion
 
 ## Mid term (Developer Platform CLI)

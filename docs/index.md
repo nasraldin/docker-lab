@@ -72,6 +72,7 @@ ducker doctor
 ## Next steps
 
 - [Installation](installation.md) — profiles, first boot, UI
+- [CLI reference](cli-reference.md) — every command with simulated output
 - [Architecture](architecture.md) — Lima + Debian + rootless Docker
 - [Troubleshooting](troubleshooting.md) — symptoms, fixes, what **not** to do
 - [Roadmap](roadmap.md) — toward a Developer Platform CLI

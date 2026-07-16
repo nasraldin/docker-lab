@@ -101,6 +101,7 @@ LIVE=1 ducker test         # runtime validation (needs Running VM)
 ```
 
 See [Installation](https://nasraldin.github.io/docker-lab/installation/) for profiles, disk sizing, and day-to-day ops.
+Full command gallery: [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/).
 
 ---
 
@@ -127,6 +128,7 @@ Details: [Architecture](https://nasraldin.github.io/docker-lab/architecture/)
 | Doc | Contents |
 | --- | --- |
 | [Installation](https://nasraldin.github.io/docker-lab/installation/) | Install paths, profiles, first boot |
+| [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/) | Every command + simulated terminal output |
 | [Architecture](https://nasraldin.github.io/docker-lab/architecture/) | Stack, Lima 2.x rules, sizing |
 | [Docker daemon](https://nasraldin.github.io/docker-lab/docker-daemon/) | Rootless `daemon.json`, BuildKit |
 | [Performance](https://nasraldin.github.io/docker-lab/performance/) | Mounts, volumes, benchmarks |

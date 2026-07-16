@@ -88,6 +88,7 @@ nav:
       - Performance: performance.md
       - Advanced: advanced.md
   - Operations:
+      - CLI reference: cli-reference.md
       - Troubleshooting: troubleshooting.md
       - Screenshots: screenshots/index.md
   - Project:
