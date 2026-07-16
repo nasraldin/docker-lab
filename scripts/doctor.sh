@@ -149,10 +149,10 @@ fix_wait_docker_socket() {
     fix_skip "VM not Running — no socket wait"
     return 0
   fi
-  local i
-  for i in $(seq 1 45); do
-    if [[ -S "${DOCKER_SOCK}" ]] && DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker info >/dev/null 2>&1; then
-      fix_ok "Docker socket ready (${DOCKER_SOCK})"
+  local n
+  for n in $(seq 1 45); do
+    if [[ -S "${DOCKER_SOCK}" ]] && DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
+      fix_ok "Docker socket ready (${DOCKER_SOCK}) after ~$((n * 2))s"
       return 0
     fi
     sleep 2
@@ -184,7 +184,7 @@ fix_guest_docker_active() {
     fix_skip "VM not Running"
     return 0
   fi
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker info >/dev/null 2>&1; then
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
     fix_skip "docker info already OK"
     return 0
   fi
@@ -196,7 +196,7 @@ fix_guest_docker_active() {
     systemctl --user --quiet is-active docker
   ' 2>/dev/null || true
   sleep 3
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker info >/dev/null 2>&1; then
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
     fix_ok "guest Docker responding after restart"
   else
     fix_warn "still unreachable — journalctl --user -u docker inside guest"
@@ -209,17 +209,17 @@ fix_buildx_default() {
     fix_skip "docker CLI missing"
     return 0
   fi
-  if ! DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker info >/dev/null 2>&1; then
+  if ! DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
     fix_skip "daemon unreachable — skip buildx"
     return 0
   fi
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker buildx inspect default >/dev/null 2>&1; then
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx inspect default >/dev/null 2>&1; then
     fix_skip "buildx default already healthy"
     return 0
   fi
   # With DOCKER_HOST set, default builder should track the engine; nudge inspect/ls
-  DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker buildx ls >/dev/null 2>&1 || true
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT= docker buildx inspect default >/dev/null 2>&1; then
+  DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx ls >/dev/null 2>&1 || true
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx inspect default >/dev/null 2>&1; then
     fix_ok "buildx default healthy after refresh"
   else
     fix_warn "buildx default still unhealthy — ensure DOCKER_HOST in new shells (source ~/.zshrc)"
