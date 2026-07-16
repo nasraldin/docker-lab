@@ -8,14 +8,14 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
 UI_ROOT="${ROOT_DIR}/apps/ui"
 DEFAULT_FILE="${UI_ROOT}/.default"
-KNOWN_PROVIDERS=(arcane dockhand)
+KNOWN_PROVIDERS=(dockhand arcane)
 
 ACTION="${1:-help}"
 PROVIDER_ARG="${2:-}"
 
-provider_dir()   { printf '%s/%s' "${UI_ROOT}" "$1"; }
-compose_file()   { printf '%s/compose.yaml' "$(provider_dir "$1")"; }
-env_file()       { printf '%s/.env' "$(provider_dir "$1")"; }
+provider_dir() { printf '%s/%s' "${UI_ROOT}" "$1"; }
+compose_file() { printf '%s/compose.yaml' "$(provider_dir "$1")"; }
+env_file() { printf '%s/.env' "$(provider_dir "$1")"; }
 
 provider_known() {
   local p
@@ -74,7 +74,7 @@ prompt_default() {
   done
   printf 'Choose default [1-%d]: ' "${#installed[@]}" >&2
   read -r choice
-  if [[ "${choice}" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#installed[@]} )); then
+  if [[ "${choice}" =~ ^[0-9]+$ ]] && ((choice >= 1 && choice <= ${#installed[@]})); then
     write_default "${installed[$((choice - 1))]}"
     return 0
   fi
@@ -93,9 +93,9 @@ resolve_provider() {
     return 0
   fi
 
-  # install without name → default to arcane (first / documented default)
+  # install without name → default to dockhand (documented project default)
   if [[ "${action}" == "install" ]]; then
-    printf 'arcane'
+    printf 'dockhand'
     return 0
   fi
 
@@ -120,7 +120,7 @@ resolve_provider() {
     return 0
   fi
 
-  die "No UI installed and no provider specified. Try: make ui install arcane"
+  die "No UI installed and no provider specified. Try: make ui install dockhand"
 }
 
 require_stack() {
@@ -132,7 +132,8 @@ require_stack() {
 }
 
 compose_for() {
-  local p="$1"; shift
+  local p="$1"
+  shift
   require_file "$(compose_file "$p")" "$(env_file "$p")"
   docker compose --project-name "ui-${p}" --env-file "$(env_file "$p")" -f "$(compose_file "$p")" "$@"
 }
@@ -140,8 +141,8 @@ compose_for() {
 detect_guest_docker_sock() {
   local sock
   sock="$(limactl shell "${INSTANCE_NAME}" -- bash -lc 'printf %s "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/docker.sock"')"
-  limactl shell "${INSTANCE_NAME}" -- bash -lc "test -S '${sock}'" \
-    || die "Guest Docker socket not found at ${sock} (is rootless Docker running?)"
+  limactl shell "${INSTANCE_NAME}" -- bash -lc "test -S '${sock}'" ||
+    die "Guest Docker socket not found at ${sock} (is rootless Docker running?)"
   printf '%s' "${sock}"
 }
 
@@ -159,10 +160,13 @@ ensure_env_arcane() {
   read -r puid pgid <<<"$(detect_guest_ids)"
   port=3552
   app_url="http://localhost:${port}"
-  enc=""; jwt=""
+  enc=""
+  jwt=""
   if [[ -f "${ef}" ]]; then
     # shellcheck disable=SC1090
-    set -a; source "${ef}"; set +a
+    set -a
+    source "${ef}"
+    set +a
     enc="${ENCRYPTION_KEY:-}"
     jwt="${JWT_SECRET:-}"
     port="${UI_PORT:-${port}}"
@@ -194,7 +198,9 @@ ensure_env_dockhand() {
   app_url="http://localhost:${port}"
   if [[ -f "${ef}" ]]; then
     # shellcheck disable=SC1090
-    set -a; source "${ef}"; set +a
+    set -a
+    source "${ef}"
+    set +a
     port="${UI_PORT:-${port}}"
     app_url="${APP_URL:-http://localhost:${port}}"
   fi
@@ -210,7 +216,7 @@ EOF
 
 ensure_env() {
   case "$1" in
-    arcane)   ensure_env_arcane ;;
+    arcane) ensure_env_arcane ;;
     dockhand) ensure_env_dockhand ;;
     *) die "No env generator for provider: $1" ;;
   esac
@@ -249,16 +255,16 @@ Docker UI manager (optional — not part of `make install`)
 
 Usage:
   make ui list
-  make ui install [arcane|dockhand]   # default provider if omitted: arcane
+  make ui install [dockhand|arcane]   # default provider if omitted: dockhand
   make ui up|down|status|open|uninstall [provider]
   make ui default <provider>          # set default for bare commands
   make ui help
 
 Examples:
-  make ui install                 # installs arcane, sets as default
-  make ui install dockhand        # install second UI; may ask for default
+  make ui install                 # installs dockhand, sets as default
+  make ui install arcane          # install second UI; may ask for default
   make ui open                    # opens default provider
-  make ui open dockhand
+  make ui open arcane
   make ui default dockhand
   make ui uninstall arcane
 EOF
@@ -281,9 +287,9 @@ cmd_list() {
     mark=""
     [[ "$p" == "${def}" ]] && mark="*"
     case "$p" in
-      arcane)   url="http://localhost:3552" ;;
+      arcane) url="http://localhost:3552" ;;
       dockhand) url="http://localhost:9090" ;;
-      *)        url="-" ;;
+      *) url="-" ;;
     esac
     printf '%-12s %-10s %-8s %s\n' "$p" "$status" "${mark:--}" "$url"
   done
@@ -302,7 +308,9 @@ cmd_install() {
   compose_for "$p" up -d --remove-orphans
   maybe_set_default_after_install "$p"
   # shellcheck disable=SC1090
-  set -a; source "$(env_file "$p")"; set +a
+  set -a
+  source "$(env_file "$p")"
+  set +a
   log "UI (${p}) → ${APP_URL}"
   case "$p" in
     arcane)
@@ -352,7 +360,9 @@ cmd_open() {
   url="http://localhost:3552"
   if [[ -f "$(env_file "$p")" ]]; then
     # shellcheck disable=SC1090
-    set -a; source "$(env_file "$p")"; set +a
+    set -a
+    source "$(env_file "$p")"
+    set +a
     url="${APP_URL}"
   else
     case "$p" in
@@ -404,15 +414,15 @@ cmd_default() {
 }
 
 case "${ACTION}" in
-  help|-h|--help) cmd_help ;;
-  list|ls)        cmd_list ;;
-  install)        cmd_install ;;
-  up|start)       cmd_up ;;
-  down|stop)      cmd_down ;;
-  status|ps)      cmd_status ;;
-  open)           cmd_open ;;
-  uninstall|rm)   cmd_uninstall ;;
-  default|use)    cmd_default ;;
+  help | -h | --help) cmd_help ;;
+  list | ls) cmd_list ;;
+  install) cmd_install ;;
+  up | start) cmd_up ;;
+  down | stop) cmd_down ;;
+  status | ps) cmd_status ;;
+  open) cmd_open ;;
+  uninstall | rm) cmd_uninstall ;;
+  default | use) cmd_default ;;
   *)
     cmd_help
     die "Unknown action: ${ACTION}"

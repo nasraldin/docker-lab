@@ -13,6 +13,7 @@ DOCKER_CONFIG_JSON="${DOCKER_CONFIG_JSON:-${HOME}/.docker/config.json}"
 ZSHRC_FILE="${ZSHRC_FILE:-${HOME}/.zshrc}"
 MARKER_BEGIN='# >>> lima-docker-homelab >>>'
 MARKER_END='# <<< lima-docker-homelab <<<'
+export MARKER_BEGIN MARKER_END
 
 # Homebrew Docker CLI plugins (Apple Silicon or Intel)
 _default_cli_plugins_dir() {
@@ -32,9 +33,12 @@ _default_cli_plugins_dir() {
 }
 CLI_PLUGINS_DIR="${CLI_PLUGINS_DIR:-$(_default_cli_plugins_dir)}"
 
-log()  { printf '==> %s\n' "$*"; }
+log() { printf '==> %s\n' "$*"; }
 warn() { printf 'WARN: %s\n' "$*" >&2; }
-die()  { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+die() {
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 1
+}
 
 require_cmd() {
   local cmd
@@ -59,8 +63,8 @@ require_file() {
 
 lima_status() {
   limactl list -q 2>/dev/null | grep -qx "${INSTANCE_NAME}" || return 1
-  limactl list -f '{{.Name}} {{.Status}}' 2>/dev/null \
-    | awk -v n="${INSTANCE_NAME}" '$1 == n { print $2; exit }'
+  limactl list -f '{{.Name}} {{.Status}}' 2>/dev/null |
+    awk -v n="${INSTANCE_NAME}" '$1 == n { print $2; exit }'
 }
 
 lima_exists() {

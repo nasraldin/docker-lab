@@ -70,7 +70,7 @@ echo "# ducker e2e $(date '+%Y-%m-%dT%H:%M:%S%z')" | tee -a "${LOG}"
 echo "| Command | Exit | Status | Notes |" | tee -a "${LOG}"
 echo "| --- | --- | --- | --- |" | tee -a "${LOG}"
 
-cd "${ROOT}"
+cd "${ROOT}" || exit 1
 
 # --- Meta -------------------------------------------------------------------
 run "ducker help" "${DUCKER}" help

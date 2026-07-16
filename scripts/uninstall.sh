@@ -112,6 +112,36 @@ prune_lima_caches() {
   rm -f "${HOME}/lima.REJECTED.yaml" "${PWD}/lima.REJECTED.yaml" 2>/dev/null || true
 }
 
+# Full wipe of ~/.lima (instances, _config, _networks, leftovers).
+# Used only by nuke/purge — other modes keep sibling Lima VMs intact.
+remove_lima_home() {
+  local lima_home="${HOME}/.lima"
+  if [[ ! -e "${lima_home}" ]]; then
+    log "~/.lima already absent"
+    return 0
+  fi
+
+  # Stop/delete any remaining named instances before ripping out the tree
+  if command -v limactl >/dev/null 2>&1; then
+    local name
+    while IFS= read -r name; do
+      [[ -n "${name}" ]] || continue
+      log "Stopping leftover Lima instance '${name}'"
+      limactl stop -f "${name}" 2>/dev/null || true
+      log "Deleting leftover Lima instance '${name}'"
+      limactl delete -f "${name}" 2>/dev/null || true
+    done < <(limactl list -q 2>/dev/null || true)
+  fi
+
+  log "Removing ${lima_home}"
+  rm -rf "${lima_home}"
+
+  if [[ -e "${lima_home}" ]]; then
+    die "Failed to remove ${lima_home} — check permissions / open files"
+  fi
+  log "~/.lima removed"
+}
+
 remove_host_docker_state() {
   log "Cleaning host Docker CLI state tied to this lab"
   # Contexts that pointed at Lima
@@ -142,7 +172,7 @@ purge_brew() {
 is_affirmative() {
   # Accept yes / YES / y / Y (typical terminal prompts)
   case "$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')" in
-    y|yes) return 0 ;;
+    y | yes) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -151,6 +181,7 @@ confirm_nuke() {
   printf '\n\033[1mWARNING: destructive full cleanup\033[0m\n'
   printf 'This will remove:\n'
   printf '  - Lima VM "%s" (disk, containers, images, volumes — including UIs)\n' "${INSTANCE_NAME}"
+  printf '  - Entire ~/.lima directory (all Lima instances, _config, _networks)\n'
   printf '  - Lima download caches (~/Library/Caches/lima)\n'
   printf '  - Managed DOCKER_HOST block in ~/.zshrc\n'
   printf '  - Homebrew cliPluginsExtraDirs entry\n'
@@ -175,12 +206,15 @@ nuke_all() {
   log "Nuking docker-lab stack (VM, Docker data, caches, host config, brew packages)"
   delete_instance
   prune_lima_caches
+  remove_lima_home
   remove_host_docker_state
   remove_shell_block
   remove_cli_plugins_dir
   # UI provider local state (compose templates kept)
   rm -f "${ROOT_DIR}/apps/ui/.default" \
     "${ROOT_DIR}/apps/ui"/*/.env 2>/dev/null || true
+  # Lab backups under XDG share (optional; nuke = full wipe of lab state)
+  rm -rf "${HOME}/.local/share/docker-lab" 2>/dev/null || true
   purge_brew
   log "Unset in this shell (new terminals won't load DOCKER_HOST after zshrc cleanup):"
   log "  unset DOCKER_HOST DOCKER_CONTEXT"
@@ -198,7 +232,7 @@ case "${MODE}" in
     remove_shell_block
     remove_cli_plugins_dir
     ;;
-  purge|nuke)
+  purge | nuke)
     confirm_nuke
     nuke_all
     warn "Full cleanup done. Reinstall with: cd ~/homelab/docker-lab && make install"

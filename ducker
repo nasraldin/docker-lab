@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# ducker — global CLI for docker-lab (like `ai` for ai-lab)
-# Install:  make cli-install   OR   ln -sf "$PWD/ducker" /usr/local/bin/ducker
-# Usage:    ducker help | install | status | ui … | test | …
+# ducker — global CLI for docker-lab
+# Install:  make cli-install   OR   ln -sf "$PWD/ducker" ~/.local/bin/ducker
+# Usage:    ducker help | install | status | doctor | benchmark | …
 set -euo pipefail
 
 # Resolve repo dir even when invoked via symlink (e.g. /usr/local/bin/ducker)
@@ -20,19 +20,22 @@ export ROOT_DIR="$ROOT"
 # Project metadata (override via config.env)
 DOCKER_LAB_NAME="Docker Lab"
 DOCKER_LAB_VERSION="1.0.0"
-DOCKER_LAB_TAGLINE="Lima + Debian 13 + Docker Engine for Apple Silicon"
+DOCKER_LAB_TAGLINE="Production-grade local Platform Engineering for Apple Silicon"
 DOCKER_LAB_AUTHOR="Nasr Aldin"
 DOCKER_LAB_WEBSITE="https://nasraldin.com"
-DOCKER_LAB_FOOTER="Local Docker lab tooling for your Mac — not Docker Desktop."
+DOCKER_LAB_FOOTER="Local platform engineering lab — not Docker Desktop."
 if [[ -f "$ROOT/config.env" ]]; then
   # shellcheck source=/dev/null
-  set -a; source "$ROOT/config.env"; set +a
+  set -a
+  source "$ROOT/config.env"
+  set +a
 fi
 
 DUCKER_COMMANDS=(
-  install deps config lima daemon verify doctor
-  start stop restart status list shell
-  ui test test-run
+  install deps config lima daemon verify doctor diagnose
+  start stop restart status list stats shell
+  ui test self-test test-run benchmark
+  upgrade backup restore profile
   vm-uninstall lab-uninstall uninstall uninstall-host purge nuke clean
   sync-home-template
   cli-install cli-uninstall
@@ -40,33 +43,48 @@ DUCKER_COMMANDS=(
 )
 
 run_make() {
-  # Always invoke Make from the repo so relative paths / conditional ui/ branch work
   make -C "$ROOT" --no-print-directory "$@"
+}
+
+run_script() {
+  local script="$1"
+  shift
+  /bin/bash "${ROOT}/scripts/${script}" "$@"
 }
 
 usage() {
   cat <<'EOF'
-ducker — docker-lab CLI (macOS + Lima + Docker)
+ducker — Docker Lab CLI (macOS + Lima + Docker)
 
 Usage:
   ducker <command> [args...]
 
-Setup (one-shot):
+Setup:
   install                 Full lab: deps + config + lima + daemon + verify
-  deps|config|lima|daemon Re-run one install piece (override)
+  deps|config|lima|daemon Re-run one install piece
+  profile <name>          VM size: small | balanced | power | list | show
   verify                  Health checks
-  doctor                  status + verify
-  test                    Project self-test (LIVE=1 for running VM)
+  doctor [--fix]         status + verify (optional common repairs)
+  diagnose                Deep host + Lima + Docker diagnostics
+  test | self-test        Project self-test (LIVE=1 for running VM)
   test-run                alpine + stress-ng smoke test
+  benchmark               Disk I/O, pull, and container timings
 
 Lifecycle:
   start|stop|restart      Lima VM
   status|list             VM + Docker status
+  stats                   Live docker stats + guest summary
   shell                   Shell into the Lima guest
+  upgrade                 Upgrade brew tools + re-apply config
+
+Backup:
+  backup [--vm]           Snapshot lab config (optional VM archive)
+  backup list             List backups
+  restore <id> [--vm]     Restore a backup
 
 Optional UI:
   ui <cmd> [provider]     e.g. ducker ui install dockhand
-                          providers: arcane | dockhand
+                          providers: dockhand | arcane
 
 Cleanup:
   vm-uninstall            Delete Lima VM only
@@ -74,21 +92,22 @@ Cleanup:
   nuke                    Full wipe (CONFIRM=yes to skip prompt)
 
 CLI symlink:
-  cli-install             Install this command globally (ducker)
+  cli-install             Install this command globally
   cli-uninstall           Remove global symlink
 
 Help:
   help|-h|--help          This help
-  about                   Project info card (author, versions, runtime)
+  about                   Project info card
   version                 Short version string
 
 Examples:
   ducker install
-  ducker status
-  ducker ui install
+  ducker profile balanced
+  ducker doctor --fix
+  ducker benchmark
+  ducker upgrade
+  ducker backup --vm
   ducker ui install dockhand
-  ducker ui open
-  ducker test
   LIVE=1 ducker test
 EOF
 }
@@ -135,8 +154,8 @@ docker_runtime_info() {
     return
   fi
   ver="$(docker --version 2>/dev/null | head -1)"
-  if DOCKER_HOST="${host}" DOCKER_CONTEXT= docker info >/dev/null 2>&1; then
-    eng="$(DOCKER_HOST="${host}" DOCKER_CONTEXT= docker version --format '{{.Server.Version}}' 2>/dev/null || echo '?')"
+  if DOCKER_HOST="${host}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
+    eng="$(DOCKER_HOST="${host}" DOCKER_CONTEXT='' docker version --format '{{.Server.Version}}' 2>/dev/null || echo '?')"
     printf '%s (engine %s via Lima)' "${ver}" "${eng}"
   elif [[ -S "${sock}" ]]; then
     printf '%s (socket present, daemon not ready)' "${ver}"
@@ -151,6 +170,15 @@ ui_default_info() {
     tr -d '[:space:]' <"${def}"
   else
     printf '(none)'
+  fi
+}
+
+active_profile_info() {
+  local f="${ROOT}/config/profiles/.active"
+  if [[ -f "${f}" ]]; then
+    tr -d '[:space:]' <"${f}"
+  else
+    printf '(lima defaults)'
   fi
 }
 
@@ -169,12 +197,13 @@ version_info() {
 }
 
 about() {
-  local chip mem runtime docker_rt ui_def cmds
+  local chip mem runtime docker_rt ui_def cmds profile
   chip="$(hardware_chip)"
   mem="$(hardware_memory)"
   runtime="$(lima_runtime_info)"
   docker_rt="$(docker_runtime_info)"
   ui_def="$(ui_default_info)"
+  profile="$(active_profile_info)"
   cmds="${#DUCKER_COMMANDS[@]}"
 
   cat <<EOF
@@ -193,6 +222,7 @@ about() {
   Template    ${ROOT}/lima-docker.yaml
   Config      ${ROOT}/config.env
   Daemon JSON ${ROOT}/config/daemon.json
+  Profile     ${profile}
 
   Runtime     ${runtime}
   Docker      ${docker_rt}
@@ -201,7 +231,7 @@ about() {
   DOCKER_HOST unix://${HOME}/.lima/docker/sock/docker.sock
   UI default  ${ui_def}
 
-  Features    lima · vz · virtiofs · rosetta · rootless docker · buildx · compose · multi-UI
+  Features    lima · vz · virtiofs · rosetta · rootless · buildx · compose · profiles · multi-UI
 
   Commands    ${cmds} available — run: ducker help
 
@@ -262,28 +292,52 @@ CMD="${1:-help}"
 shift || true
 
 case "$CMD" in
-  help|-h|--help)
+  help | -h | --help)
     usage
     ;;
   about)
     about
     ;;
-  version|--version|-V)
+  version | --version | -V)
     version_info
     ;;
-  install|deps|config|lima|daemon|verify|doctor|test|test-run| \
-  start|stop|restart|status|shell| \
-  vm-uninstall|lab-uninstall|uninstall|uninstall-host|purge|nuke|clean| \
-  sync-home-template)
-    # Pass through env like CONFIRM=yes LIVE=1
+  doctor)
+    run_script doctor.sh "$@"
+    ;;
+  diagnose)
+    run_script diagnose.sh "$@"
+    ;;
+  stats)
+    run_script stats.sh "$@"
+    ;;
+  benchmark)
+    run_script benchmark.sh "$@"
+    ;;
+  upgrade)
+    run_script upgrade.sh "$@"
+    ;;
+  backup)
+    run_script backup.sh "$@"
+    ;;
+  restore)
+    run_script restore.sh "$@"
+    ;;
+  profile)
+    run_script profile.sh "$@"
+    ;;
+  self-test)
+    run_make test "$@"
+    ;;
+  install | deps | config | lima | daemon | verify | test | test-run | \
+    start | stop | restart | status | shell | \
+    vm-uninstall | lab-uninstall | uninstall | uninstall-host | purge | nuke | clean | \
+    sync-home-template)
     run_make "$CMD" "$@"
     ;;
-  list|ls)
-    # Friendly alias matching `ai list` style
+  list | ls)
     run_make status
     ;;
   ui)
-    # make ui <subcommand> [provider…]
     run_make ui "$@"
     ;;
   cli-install)
@@ -291,6 +345,10 @@ case "$CMD" in
     ;;
   cli-uninstall)
     cli_uninstall
+    ;;
+  update)
+    # Friendly alias used by brew-like CLIs
+    run_script upgrade.sh "$@"
     ;;
   *)
     echo "ERROR: unknown command '${CMD}'" >&2

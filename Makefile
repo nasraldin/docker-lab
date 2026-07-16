@@ -21,6 +21,9 @@ RUN           := /bin/bash
 INSTANCE_NAME ?= docker
 LIMA_TEMPLATE ?= $(ROOT_DIR)/lima-docker.yaml
 CONFIRM       ?=
+ARGS          ?=
+FIX           ?=
+VM            ?=
 export ROOT_DIR INSTANCE_NAME LIMA_TEMPLATE CONFIRM
 export LIMA_SHELL ?= /bin/bash
 
@@ -32,7 +35,9 @@ UI_WORDS := install uninstall up down stop start status open default list ls \
 	deps config lima daemon verify \
 	vm-uninstall lab-uninstall uninstall-host \
 	purge nuke clean doctor sync-home-template test test-run shell restart \
-	cli-install cli-uninstall
+	cli-install cli-uninstall \
+	benchmark upgrade backup restore profile diagnose stats self-test \
+	small balanced power
 
 # =============================================================================
 ifeq (ui,$(firstword $(MAKECMDGOALS)))
@@ -131,9 +136,24 @@ shell: ## Open a shell in the Lima guest
 verify: ## Run health checks (host tools, VM, Docker, buildx)
 	@$(RUN) "$(SCRIPTS)/verify.sh"
 
+.PHONY: doctor
+doctor: ## status + verify (FIX=1 make doctor for repairs)
+	@$(RUN) "$(SCRIPTS)/doctor.sh" $(if $(filter 1,$(FIX)),--fix,)
+
+.PHONY: diagnose
+diagnose: ## Deep host + Lima + Docker diagnostics
+	@$(RUN) "$(SCRIPTS)/diagnose.sh"
+
+.PHONY: stats
+stats: ## Live Docker stats + Lima summary
+	@$(RUN) "$(SCRIPTS)/stats.sh"
+
 .PHONY: test
 test: ## Self-test the project (static + safe checks; LIVE=1 for running VM)
 	@$(RUN) "$(SCRIPTS)/test.sh"
+
+.PHONY: self-test
+self-test: test ## Alias for test
 
 .PHONY: test-run
 test-run: ## Smoke-test with alpine + stress-ng (needs running VM)
@@ -144,11 +164,70 @@ test-run: ## Smoke-test with alpine + stress-ng (needs running VM)
 		DOCKER_CONTEXT= \
 		docker run --rm ghcr.io/colinianking/stress-ng --cpu 2 --timeout 10s --metrics-brief
 
+.PHONY: benchmark
+benchmark: ## Disk I/O, pull, and build timings (needs Running VM)
+	@$(RUN) "$(SCRIPTS)/benchmark.sh"
+
 ##@ Optional — UI (not part of make install)
 
 .PHONY: ui
 ui: ## Docker UI: make ui <install|up|down|open|status|uninstall|default|list> [provider]
 	@$(RUN) "$(SCRIPTS)/ui.sh" $(filter-out $@,$(MAKECMDGOALS))
+
+##@ Maintenance
+
+.PHONY: upgrade
+upgrade: ## Upgrade brew packages + re-apply config + verify
+	@$(RUN) "$(SCRIPTS)/upgrade.sh"
+
+.PHONY: backup
+backup: ## Snapshot lab config (VM=1 make backup for Lima archive)
+	@$(RUN) "$(SCRIPTS)/backup.sh" $(if $(filter 1,$(VM)),--vm,) $(ARGS)
+
+.PHONY: restore
+restore: ## Restore: make restore ARGS='<id>' (VM=1 for VM archive)
+	@$(RUN) "$(SCRIPTS)/restore.sh" $(ARGS) $(if $(filter 1,$(VM)),--vm,)
+
+.PHONY: profile
+profile: ## VM profiles: make profile ARGS='list|show|small|balanced|power'
+	@$(RUN) "$(SCRIPTS)/profile.sh" $(or $(ARGS),list)
+
+.PHONY: sync-home-template
+sync-home-template: ## Copy lima-docker.yaml to ~/lima-docker.yaml
+	@cp -f "$(LIMA_TEMPLATE)" "$(HOME)/lima-docker.yaml"
+	@echo "Updated $(HOME)/lima-docker.yaml"
+
+.PHONY: cli-install
+cli-install: ## Install global `ducker` CLI (symlink)
+	@$(ROOT_DIR)/ducker cli-install
+
+.PHONY: cli-uninstall
+cli-uninstall: ## Remove global `ducker` symlink
+	@$(ROOT_DIR)/ducker cli-uninstall
+
+##@ Docs
+
+.PHONY: docs-serve
+docs-serve: ## Serve docs locally (http://127.0.0.1:8000)
+	@if [[ -x "$(ROOT_DIR)/.venv-docs/bin/mkdocs" ]]; then \
+		"$(ROOT_DIR)/.venv-docs/bin/mkdocs" serve; \
+	elif command -v mkdocs >/dev/null 2>&1; then \
+		mkdocs serve; \
+	else \
+		echo "Install: python3 -m venv .venv-docs && . .venv-docs/bin/activate && pip install -r requirements-docs.txt"; \
+		exit 1; \
+	fi
+
+.PHONY: docs-build
+docs-build: ## Build static docs site into ./site
+	@if [[ -x "$(ROOT_DIR)/.venv-docs/bin/mkdocs" ]]; then \
+		"$(ROOT_DIR)/.venv-docs/bin/mkdocs" build --strict; \
+	elif command -v mkdocs >/dev/null 2>&1; then \
+		mkdocs build --strict; \
+	else \
+		echo "Install: python3 -m venv .venv-docs && . .venv-docs/bin/activate && pip install -r requirements-docs.txt"; \
+		exit 1; \
+	fi
 
 ##@ Cleanup
 
@@ -160,7 +239,6 @@ vm-uninstall: ## Delete Lima instance only (keeps brew + host config)
 lab-uninstall: ## Delete instance + remove shell/CLI managed config
 	@$(RUN) "$(SCRIPTS)/uninstall.sh" host
 
-# Aliases (recipe-only — never use prerequisite form; merges with ui stubs)
 .PHONY: uninstall
 uninstall: ## Alias for vm-uninstall
 	@$(RUN) "$(SCRIPTS)/uninstall.sh" instance
@@ -180,25 +258,5 @@ nuke: ## FULL cleanup (prompt, or: make nuke CONFIRM=yes)
 .PHONY: clean
 clean: ## Alias: stop VM (non-destructive)
 	@limactl stop $(INSTANCE_NAME)
-
-##@ Maintenance
-
-.PHONY: sync-home-template
-sync-home-template: ## Copy lima-docker.yaml to ~/lima-docker.yaml
-	@cp -f "$(LIMA_TEMPLATE)" "$(HOME)/lima-docker.yaml"
-	@echo "Updated $(HOME)/lima-docker.yaml"
-
-.PHONY: doctor
-doctor: ## status + verify
-	@$(MAKE) status
-	@$(MAKE) verify
-
-.PHONY: cli-install
-cli-install: ## Install global `ducker` CLI (symlink; like ai-lab's `ai`)
-	@$(ROOT_DIR)/ducker cli-install
-
-.PHONY: cli-uninstall
-cli-uninstall: ## Remove global `ducker` symlink
-	@$(ROOT_DIR)/ducker cli-uninstall
 
 endif

@@ -15,14 +15,21 @@ LIVE="${LIVE:-0}"
 failures=0
 passed=0
 
-pass() { printf '  [PASS] %s\n' "$*"; passed=$((passed + 1)); }
-fail() { printf '  [FAIL] %s\n' "$*" >&2; failures=$((failures + 1)); }
+pass() {
+  printf '  [PASS] %s\n' "$*"
+  passed=$((passed + 1))
+}
+fail() {
+  printf '  [FAIL] %s\n' "$*" >&2
+  failures=$((failures + 1))
+}
 skip() { printf '  [SKIP] %s\n' "$*"; }
 
 section() { printf '\n==> %s\n' "$*"; }
 
 assert_cmd() {
-  local name="$1"; shift
+  local name="$1"
+  shift
   if "$@"; then
     pass "${name}"
   else
@@ -38,8 +45,12 @@ REQUIRED_FILES=(
   "${ROOT_DIR}/Brewfile"
   "${ROOT_DIR}/lima-docker.yaml"
   "${ROOT_DIR}/README.md"
+  "${ROOT_DIR}/install.sh"
   "${ROOT_DIR}/config/daemon.json"
   "${ROOT_DIR}/config/zshrc.snippet"
+  "${ROOT_DIR}/config/profiles/small.env"
+  "${ROOT_DIR}/config/profiles/balanced.env"
+  "${ROOT_DIR}/config/profiles/power.env"
   "${ROOT_DIR}/apps/ui/arcane/compose.yaml"
   "${ROOT_DIR}/apps/ui/arcane/.env.example"
   "${ROOT_DIR}/apps/ui/dockhand/compose.yaml"
@@ -54,6 +65,22 @@ REQUIRED_FILES=(
   "${ROOT_DIR}/scripts/uninstall.sh"
   "${ROOT_DIR}/scripts/ui.sh"
   "${ROOT_DIR}/scripts/test.sh"
+  "${ROOT_DIR}/scripts/doctor.sh"
+  "${ROOT_DIR}/scripts/diagnose.sh"
+  "${ROOT_DIR}/scripts/stats.sh"
+  "${ROOT_DIR}/scripts/benchmark.sh"
+  "${ROOT_DIR}/scripts/upgrade.sh"
+  "${ROOT_DIR}/scripts/backup.sh"
+  "${ROOT_DIR}/scripts/restore.sh"
+  "${ROOT_DIR}/scripts/profile.sh"
+  "${ROOT_DIR}/docs/installation.md"
+  "${ROOT_DIR}/docs/architecture.md"
+  "${ROOT_DIR}/docs/troubleshooting.md"
+  "${ROOT_DIR}/docs/index.md"
+  "${ROOT_DIR}/mkdocs.yml"
+  "${ROOT_DIR}/requirements-docs.txt"
+  "${ROOT_DIR}/.github/workflows/ci.yml"
+  "${ROOT_DIR}/.github/workflows/docs.yml"
   "${ROOT_DIR}/ducker"
 )
 for f in "${REQUIRED_FILES[@]}"; do
@@ -120,6 +147,27 @@ else
   fail "./ducker about"
 fi
 
+if bash -n "${ROOT_DIR}/install.sh" 2>/dev/null; then
+  pass "bash -n install.sh"
+else
+  fail "bash -n install.sh"
+fi
+
+if bash "${ROOT_DIR}/scripts/profile.sh" list >/dev/null 2>&1; then
+  pass "scripts/profile.sh list"
+else
+  fail "scripts/profile.sh list"
+fi
+
+if bash "${ROOT_DIR}/scripts/backup.sh" list >/dev/null 2>&1; then
+  pass "scripts/backup.sh list"
+else
+  fail "scripts/backup.sh list"
+fi
+
+assert_cmd "README positions Platform Engineering" \
+  grep -qi 'Platform Engineering' "${ROOT_DIR}/README.md"
+
 assert_cmd "lima-docker.yaml references debian-13" \
   grep -q 'debian-13' "${ROOT_DIR}/lima-docker.yaml"
 
@@ -133,7 +181,7 @@ assert_cmd "Makefile has ui firstword collision guard" \
   grep -qF 'ifeq (ui,$(firstword $(MAKECMDGOALS)))' "${ROOT_DIR}/Makefile"
 
 section "Make: help / dry-run / UI collision safety"
-cd "${ROOT_DIR}"
+cd "${ROOT_DIR}" || exit 1
 
 if make help >/dev/null 2>&1; then
   pass "make help"
@@ -192,7 +240,7 @@ for action in help list; do
 done
 
 # ui.sh help works without Docker/Lima
-if ROOT_DIR="${ROOT_DIR}" bash "${ROOT_DIR}/scripts/ui.sh" help >/dev/null 2>&1; then
+if bash "${ROOT_DIR}/scripts/ui.sh" help >/dev/null 2>&1; then
   pass "scripts/ui.sh help"
 else
   fail "scripts/ui.sh help"
