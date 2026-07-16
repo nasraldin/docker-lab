@@ -9,18 +9,22 @@ ducker diagnose
 ducker verify
 ```
 
+`ducker doctor --fix` applies structured repairs (host tools, CLI plugins, `DOCKER_HOST`, Lima restart, guest `daemon.json`, buildx). See [CLI reference — doctor](cli-reference.md#ducker-doctor).
+
 ## Symptom → fix
 
 | Symptom | Fix |
 | --- | --- |
 | `field images must be set` | Use this repo’s `lima-docker.yaml` (has `base:` / images) |
-| Instance `Stopped`, no disk | Incomplete first start → `limactl stop -f docker && limactl start docker` |
-| `another hostagent may already be running` | `limactl stop -f docker` then start again |
-| `cliPluginsExtraDirs` in daemon.json → Docker won’t start | Remove from guest daemon.json; keep only in Mac `~/.docker/config.json` |
-| buildx `default` error on `/var/run/docker.sock` | Set `DOCKER_HOST` to Lima socket (`ducker config`) |
-| `manifest.v1+prettyjws is no longer supported` | Image too old — pick a maintained image |
-| Compose/buildx “unknown command” | Fix `cliPluginsExtraDirs` + `brew install docker-compose docker-buildx` |
+| Instance `Stopped`, no disk | `ducker doctor --fix` (force stop/start) or `limactl stop -f docker && limactl start docker` |
+| `another hostagent may already be running` | `ducker doctor --fix` or `limactl stop -f docker` then start |
+| `cliPluginsExtraDirs` in daemon.json → Docker won’t start | `ducker doctor --fix` re-applies known-good guest `daemon.json` |
+| buildx `default` error on `/var/run/docker.sock` | `ducker doctor --fix` (sets `DOCKER_HOST` + clears context) |
+| Compose/buildx “unknown command” | `ducker doctor --fix` (plugins + Brewfile) or `ducker deps` |
+| Docker unreachable but VM Running | `ducker doctor --fix` (socket wait + guest docker restart) |
 | Harmless restart warning `127.0.0.1:5355 address already in use` | LLMNR collision — ignore unless you need that forward |
+| `manifest.v1+prettyjws is no longer supported` | Image too old — pick a maintained image |
+| No Lima instance at all | `ducker install` (doctor will not create one) |
 
 ## Logs
 

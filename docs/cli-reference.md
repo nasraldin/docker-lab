@@ -296,7 +296,7 @@ OS=Debian GNU/Linux 13 (trixie) Arch=aarch64
 
 ### `ducker doctor`
 
-**What it does:** Runs `status` then `verify`. With `--fix`, reapplies host config, force-restarts a stuck VM, and reapplies guest daemon.json.
+**What it does:** Runs `status` then `verify`. With `--fix`, applies a structured set of common repairs, then verifies again.
 
 **When to use:** First response to “Docker feels broken.”
 
@@ -319,12 +319,56 @@ $ ducker doctor --fix
 ==> Doctor — status
 ...
 ==> Doctor --fix: applying common repairs
-==> Merging Docker CLI plugins...
-==> Installing DOCKER_HOST block...
-==> Applying guest daemon.json...
+
+==> Fix: host tools
+  [SKIP] limactl + docker + compose + buildx already present
+
+==> Fix: Docker CLI plugins (cliPluginsExtraDirs)
+  [FIX]  merged cliPluginsExtraDirs into /Users/you/.docker/config.json
+
+==> Fix: DOCKER_HOST shell block
+  [FIX]  managed block in /Users/you/.zshrc
+
+==> Fix: Docker context / DOCKER_HOST for this session
+  [FIX]  DOCKER_HOST=unix:///Users/you/.lima/docker/sock/docker.sock (DOCKER_CONTEXT unset)
+
+==> Fix: Lima instance 'docker'
+  [SKIP] instance already Running
+
+==> Fix: wait for Docker socket
+  [FIX]  Docker socket ready (...)
+
+==> Fix: guest rootless daemon.json
+  [FIX]  applied config/daemon.json + restarted user Docker
+
+==> Fix: ensure guest Docker user unit is active
+  [SKIP] docker info already OK
+
+==> Fix: buildx default builder
+  [SKIP] buildx default already healthy
+
+==> Doctor --fix summary: 4 applied, 4 skipped
+WARN: Open a new terminal (or: source ~/.zshrc) so DOCKER_HOST is loaded
+
 ==> Doctor — verify
 ==> Doctor: healthy
 ```
+
+**`--fix` covers**
+
+| Area | Repair |
+| --- | --- |
+| Host tools | Install Brewfile packages if `limactl` / `docker` / compose / buildx missing |
+| CLI plugins | Merge `cliPluginsExtraDirs` into `~/.docker/config.json` |
+| Shell env | Re-install managed `DOCKER_HOST` block in `~/.zshrc` |
+| Context | Unset `DOCKER_CONTEXT`, prefer `default`, drop leftover `lima-*` contexts |
+| Lima | Force stop + start when instance exists but is not Running (stale hostagent) |
+| Socket | Wait up to ~90s for the Lima Docker socket |
+| Guest daemon | Re-apply known-good `daemon.json` (removes bad keys like `cliPluginsExtraDirs` / `overlay2`) |
+| Guest Docker | Restart user Docker if `docker info` still fails |
+| Buildx | Refresh / re-check `default` builder once the engine is up |
+
+Does **not** create a missing Lima instance — run `ducker install` (or `ducker lima`) for that.
 
 ---
 

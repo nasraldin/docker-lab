@@ -165,6 +165,15 @@ else
   fail "scripts/backup.sh list"
 fi
 
+if bash "${ROOT_DIR}/scripts/doctor.sh" --help >/dev/null 2>&1; then
+  pass "scripts/doctor.sh --help"
+else
+  fail "scripts/doctor.sh --help"
+fi
+
+assert_cmd "doctor.sh documents --fix coverage steps" \
+  bash -c "grep -q 'fix_guest_daemon' '${ROOT_DIR}/scripts/doctor.sh' && grep -q 'fix_wait_docker_socket' '${ROOT_DIR}/scripts/doctor.sh' && grep -q 'fix_buildx_default' '${ROOT_DIR}/scripts/doctor.sh'"
+
 assert_cmd "README positions Platform Engineering" \
   grep -qi 'Platform Engineering' "${ROOT_DIR}/README.md"
 
