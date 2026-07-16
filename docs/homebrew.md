@@ -79,9 +79,17 @@ The docker-lab release workflow needs permission to push to `homebrew-tools`.
 
 ```bash
 brew tap nasraldin/tools
+brew update
 brew install ducker-lab
 ducker version
-ducker install
+```
+
+If `brew info ducker-lab` says “No available formula”, your tap is stale (common if you tapped before the first release). Run `brew update` and try again, or:
+
+```bash
+brew untap nasraldin/tools
+brew tap nasraldin/tools
+brew install ducker-lab
 ```
 
 ---
