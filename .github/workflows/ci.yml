@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    name: Lint & test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install lint tools
+        run: |
+          brew install shellcheck shfmt yamllint actionlint markdownlint-cli
+
+      - name: ShellCheck
+        run: |
+          set -euo pipefail
+          files=(ducker install.sh)
+          while IFS= read -r f; do files+=("$f"); done < <(find scripts -type f -name '*.sh' | sort)
+          # SC1091/SC1090: dynamic sources; SC2016: intentional guest single-quoted scripts
+          shellcheck -x -e SC1090,SC1091,SC2016 "${files[@]}"
+
+      - name: shfmt (diff check)
+        run: |
+          set -euo pipefail
+          files=(ducker install.sh)
+          while IFS= read -r f; do files+=("$f"); done < <(find scripts -type f -name '*.sh' | sort)
+          shfmt -d -i 2 -ci "${files[@]}"
+
+      - name: yamllint
+        run: |
+          yamllint -c .yamllint.yaml \
+            lima-docker.yaml \
+            apps/ui/arcane/compose.yaml \
+            apps/ui/dockhand/compose.yaml \
+            .github/workflows/
+
+      - name: markdownlint
+        run: |
+          markdownlint -c .markdownlint.yaml \
+            README.md \
+            docs \
+            apps/ui/README.md
+
+      - name: actionlint
+        run: actionlint
+
+      - name: make test (static)
+        run: make test

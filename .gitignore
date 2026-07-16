@@ -5,14 +5,23 @@ apps/ui/.default
 **/.env
 !.env.example
 !config.env
+!config/profiles/*.env
+
+# Active VM profile marker (machine-local)
+config/profiles/.active
 
 # Local E2E artifacts
 .e2e-results.log
 .e2e-console.log
 
-
 # Local clutter
 .DS_Store
+**/.DS_Store
 *.log
 lima.REJECTED.yaml
 .firecrawl/
+
+# MkDocs / local tooling
+/site/
+.cache/
+.venv-docs/
