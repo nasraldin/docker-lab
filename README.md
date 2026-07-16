@@ -2,31 +2,126 @@
 
 Professional install-and-run guide for a fast, production-like Docker lab on Apple Silicon.
 
+Use **`ducker`** as the global CLI. It wraps this repo’s Makefile and scripts so you can install, manage, and verify the lab from any directory. The sections below document the underlying Lima + Docker setup in detail.
+
 This documents the **validated** stack (not generic Docker Desktop advice). Several common recommendations fail on Lima 2.x / rootless Docker / containerd v2 — those traps are called out below.
+
+---
+
+## Global CLI (`ducker`)
+
+`ducker` is a bash script in this repo. Install it once globally, then run the whole lab without `cd` into the project folder.
+
+### Get the repo
+
+```bash
+git clone https://github.com/nasraldin/docker-lab.git ~/homelab/docker-lab
+cd ~/homelab/docker-lab
+```
+
+### Install the global command
+
+```bash
+ducker cli-install          # symlinks → ~/.local/bin/ducker (or /usr/local/bin)
+ducker about                # project info card
+ducker help                 # full command list
+```
+
+Manual symlink (same result):
+
+```bash
+ln -sf ~/homelab/docker-lab/ducker ~/.local/bin/ducker
+# ensure ~/.local/bin is on your PATH
+```
+
+Remove the global link:
+
+```bash
+ducker cli-uninstall
+```
+
+### First-time lab setup
+
+From **any directory** after `cli-install`:
+
+```bash
+ducker install              # deps + config + lima + daemon + verify (no UI)
+ducker status               # Lima VM + Docker engine
+ducker verify               # health checks
+ducker doctor               # status + verify
+```
+
+Optional Docker UI (not part of `install`):
+
+```bash
+ducker ui install           # arcane (default)
+ducker ui install dockhand
+ducker ui open
+ducker ui status
+```
+
+### Everyday commands
+
+| Command | What it does |
+| --- | --- |
+| `ducker install` | Full lab one-shot (idempotent) |
+| `ducker deps` | Homebrew packages (`Brewfile`) |
+| `ducker config` | `~/.docker/config.json` plugins + `DOCKER_HOST` in `~/.zshrc` |
+| `ducker lima` | Create/start Lima VM from `lima-docker.yaml` |
+| `ducker daemon` | Apply guest rootless `daemon.json` + restart Docker |
+| `ducker verify` | Host tools, VM, Docker, buildx checks |
+| `ducker start` \| `stop` \| `restart` | Lima VM lifecycle |
+| `ducker status` \| `list` | VM + Docker summary |
+| `ducker shell` | Interactive shell in the Debian guest |
+| `ducker ui …` | Optional UI: `install`, `up`, `down`, `open`, `status`, `default`, `uninstall` |
+| `ducker test` | Project self-test (static; safe anytime) |
+| `LIVE=1 ducker test` | Full runtime test (needs Running VM) |
+| `ducker test-run` | alpine + stress-ng smoke test |
+| `ducker vm-uninstall` | Delete Lima VM only |
+| `ducker lab-uninstall` | VM + managed host shell/CLI config |
+| `ducker nuke` | Full wipe — brew packages, caches, VM (`CONFIRM=yes` to skip prompt) |
+| `ducker about` | Author, version, paths, runtime status |
+| `ducker version` | Short version string |
+
+Examples:
+
+```bash
+ducker install
+ducker status
+ducker ui install dockhand
+ducker ui open
+LIVE=1 ducker test
+CONFIRM=yes ducker nuke    # destructive — reinstall with ducker install after
+```
+
+Project metadata (version, tagline, author) lives in `config.env` and shows in `ducker about`.
+
+Requires **macOS Apple Silicon (arm64)**, Homebrew, and enough free disk for a ~200 GiB Lima disk (edit `lima-docker.yaml` to shrink if needed).
 
 ---
 
 ## Quick start (Makefile)
 
-From this directory:
+You can also use `make` from the repo directory — `ducker` calls the same targets under the hood.
 
 ```bash
 cd ~/homelab/docker-lab
-make help
-make test             # self-test (safe; no VM destroy)
-make cli-install      # or: sudo ln -sf ~/homelab/docker-lab/ducker /usr/local/bin/ducker
-ducker help
+make cli-install            # global ducker
 ducker install
 ducker status
-ducker ui install
-make install          # ONE-SHOT: deps + config + lima + daemon + verify
-make status
-LIVE=1 make test      # after install: validate running stack
+LIVE=1 make test            # after install: validate running stack
 ```
 
-Requires **macOS Apple Silicon (arm64)**, Homebrew, and enough free disk for a ~200 GiB Lima disk (edit `lima-docker.yaml` to shrink if needed).
+Or without the global CLI:
 
-### Two ways to use Make
+```bash
+make help
+make test                   # self-test (safe; no VM destroy)
+make install                # ONE-SHOT: deps + config + lima + daemon + verify
+make status
+```
+
+### Command cheat sheet
 
 | Goal | Command |
 | --- | --- |
@@ -37,27 +132,27 @@ Requires **macOS Apple Silicon (arm64)**, Homebrew, and enough free disk for a ~
 | Day-to-day VM | `ducker start` \| `stop` \| `status` \| `shell` |
 | Wipe | `ducker vm-uninstall` or `ducker nuke` (`CONFIRM=yes` to skip prompt) |
 
-`make install` is idempotent: safe to re-run. It does **not** install a UI (keep that opt-in).
+`make install` / `ducker install` is idempotent: safe to re-run. Neither installs a UI (keep that opt-in).
 
 ```bash
 # After changing lima-docker.yaml or daemon.json, only re-run what changed:
-make lima
-make daemon
+ducker lima
+ducker daemon
 
-# Optional UI (separate from make install)
-make ui install              # Arcane by default
-make ui install dockhand
-make ui open
-make ui uninstall dockhand   # UI only — does NOT delete the VM
+# Optional UI (separate from install)
+ducker ui install              # Arcane by default
+ducker ui install dockhand
+ducker ui open
+ducker ui uninstall dockhand   # UI only — does NOT delete the VM
 ```
 
-`make nuke` wipes the lab for a fresh Mac reset (keeps this git/folder).
+`ducker nuke` wipes the lab for a fresh Mac reset (keeps this git folder).
 
 Single sources of truth: `Brewfile`, `config/`, `lima-docker.yaml`, `apps/ui/<provider>/`.
 
 ### Optional: UI providers
 
-UI apps are **not** part of `make install`. Supported providers:
+UI apps are **not** part of `ducker install`. Supported providers:
 
 | Provider | Port | Notes |
 | --- | --- | --- |
@@ -65,10 +160,10 @@ UI apps are **not** part of `make install`. Supported providers:
 | `dockhand` | 9090 | First-run wizard creates admin |
 
 ```bash
-make ui install                 # → arcane, becomes default
-make ui install dockhand        # may ask which default if both exist
-make ui open                    # uses apps/ui/.default
-make ui default dockhand
+ducker ui install                 # → arcane, becomes default
+ducker ui install dockhand        # may ask which default if both exist
+ducker ui open                    # uses apps/ui/.default
+ducker ui default dockhand
 ```
 
 Secrets per provider: `apps/ui/<provider>/.env` (gitignored). Default marker: `apps/ui/.default`.
@@ -101,7 +196,7 @@ macOS (Apple Silicon)
                                 └── containers
 ```
 
-**Target hardware example:** MacBook Pro M1 Max, 64 GB RAM.  
+**Target hardware example:** MacBook Pro M1 Max, 64 GB RAM.
 **Validated tooling (reference):** Lima `2.1.4`, Docker Client/Server `29.x`.
 
 ---
@@ -135,6 +230,10 @@ brew install kubectl helm terraform ansible
 
 ---
 
+## Manual setup (Lima, Docker CLI, daemon)
+
+> **Automated path:** `ducker install` runs the steps in sections 1–4 below. Use this guide to understand, customize, or debug each piece.
+
 ## 1. Install host tools
 
 ```bash
@@ -147,7 +246,7 @@ brew install lima docker docker-compose docker-buildx yq jq
 brew install lima-additional-guestagents
 ```
 
-**Skip** for a native `aarch64` Debian VM on Apple Silicon.  
+**Skip** for a native `aarch64` Debian VM on Apple Silicon.
 Install only if you need **non-native** guest architectures (e.g. x86_64 guests) with Lima’s extra agents.
 
 ### Wire Homebrew Docker plugins
@@ -189,10 +288,10 @@ At this stage `docker version` may show **Client only** and fail to reach a daem
 
 ### Important Lima 2.x rules
 
-1. A template **must** provide guest images (`images:` or `base: template:_images/...`).  
-   A YAML with only `cpus` / `memory` / `disk` will fail with:  
+1. A template **must** provide guest images (`images:` or `base: template:_images/...`).
+   A YAML with only `cpus` / `memory` / `disk` will fail with:
    `field images must be set`.
-2. Keep templates **outside** `~/.lima/<instance>/`.  
+2. Keep templates **outside** `~/.lima/<instance>/`.
    That directory is for running instances, not source files.
 3. Prefer starting with an explicit name:
 
@@ -230,7 +329,7 @@ Key design points of that file:
 - Enables CDI + containerd snapshotter (needed for Rosetta CDI device)
 - Forwards guest docker socket → `~/.lima/docker/sock/docker.sock`
 
-> Do **not** start from vanilla `template://docker` if you want Debian 13.  
+> Do **not** start from vanilla `template://docker` if you want Debian 13.
 > The official Docker template pulls Ubuntu LTS images.
 
 ---
@@ -321,7 +420,7 @@ Docker Root Dir: /home/<user>.guest/.local/share/docker
 
 ### Why not `docker context` only?
 
-Using only `DOCKER_CONTEXT=lima-docker` leaves the built-in `default` context pointing at `/var/run/docker.sock` (Docker Desktop path).  
+Using only `DOCKER_CONTEXT=lima-docker` leaves the built-in `default` context pointing at `/var/run/docker.sock` (Docker Desktop path).
 Then `docker buildx ls` shows a scary `default ... error` even though Lima works.
 
 With `DOCKER_HOST`, `default` becomes Lima and BuildKit looks clean:
@@ -638,9 +737,9 @@ If `make test` “doesn’t work correctly”, usually you ran live expectations
 2. Tag a release (`v1.0.0` matches `config.env` / `ducker about`).
 3. README Quick start is the install path users follow:
    ```bash
-   git clone https://github.com/<you>/docker-lab.git
+   git clone https://github.com/nasraldin/docker-lab.git
    cd docker-lab
-   make cli-install   # → global `ducker`
+   ducker cli-install
    ducker install
    ducker status
    ```
