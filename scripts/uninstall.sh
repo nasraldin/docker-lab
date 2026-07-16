@@ -117,7 +117,7 @@ prune_lima_caches() {
 remove_lima_home() {
   local lima_home="${HOME}/.lima"
   if [[ ! -e "${lima_home}" ]]; then
-    log "~/.lima already absent"
+    log "${HOME}/.lima already absent"
     return 0
   fi
 
@@ -139,7 +139,7 @@ remove_lima_home() {
   if [[ -e "${lima_home}" ]]; then
     die "Failed to remove ${lima_home} — check permissions / open files"
   fi
-  log "~/.lima removed"
+  log "${HOME}/.lima removed"
 }
 
 remove_host_docker_state() {
@@ -181,7 +181,7 @@ confirm_nuke() {
   printf '\n\033[1mWARNING: destructive full cleanup\033[0m\n'
   printf 'This will remove:\n'
   printf '  - Lima VM "%s" (disk, containers, images, volumes — including UIs)\n' "${INSTANCE_NAME}"
-  printf '  - Entire ~/.lima directory (all Lima instances, _config, _networks)\n'
+  printf '  - Entire %s/.lima directory (all Lima instances, _config, _networks)\n' "${HOME}"
   printf '  - Lima download caches (~/Library/Caches/lima)\n'
   printf '  - Managed DOCKER_HOST block in ~/.zshrc\n'
   printf '  - Homebrew cliPluginsExtraDirs entry\n'
