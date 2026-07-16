@@ -31,13 +31,13 @@ Stack under the hood: Lima + Debian 13 + rootless Docker on Apple’s native `vz
 
 ## Install
 
-**One-liner**
+### One-liner
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nasraldin/docker-lab/main/install.sh | bash
 ```
 
-**Homebrew**
+### Homebrew
 
 ```bash
 brew tap nasraldin/tools
@@ -48,7 +48,7 @@ brew install ducker-lab
 
 More on the tap: [Homebrew docs](https://nasraldin.github.io/docker-lab/homebrew/).
 
-**From git**
+### From git
 
 ```bash
 git clone https://github.com/nasraldin/docker-lab.git ~/homelab/docker-lab
