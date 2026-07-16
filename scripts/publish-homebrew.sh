@@ -95,6 +95,11 @@ cd "${WORKDIR}/tap"
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+# Authenticate HTTPS push to the tap (gh clone works; bare git push needs a token URL).
+if [[ -n "${GH_TOKEN:-}" ]]; then
+  git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${TAP_REPO}.git"
+fi
+
 git add Formula/"${FORMULA_NAME}.rb" README.md
 git add -u Formula/ducker.rb 2>/dev/null || true
 if git diff --cached --quiet; then
