@@ -1,0 +1,6 @@
+# >>> lima-docker-homelab >>>
+# Managed by homelab/docker-lab Makefile — do not edit between markers.
+# Lima is the only Docker daemon — point the default client at its socket.
+export DOCKER_HOST=unix://${HOME}/.lima/docker/sock/docker.sock
+unset DOCKER_CONTEXT
+# <<< lima-docker-homelab <<<

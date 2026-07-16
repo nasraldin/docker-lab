@@ -1,0 +1,300 @@
+#!/usr/bin/env bash
+# ducker — global CLI for docker-lab (like `ai` for ai-lab)
+# Install:  make cli-install   OR   ln -sf "$PWD/ducker" /usr/local/bin/ducker
+# Usage:    ducker help | install | status | ui … | test | …
+set -euo pipefail
+
+# Resolve repo dir even when invoked via symlink (e.g. /usr/local/bin/ducker)
+SCRIPT="$0"
+while [[ -L "$SCRIPT" ]]; do
+  LINK="$(readlink "$SCRIPT")"
+  if [[ "$LINK" == /* ]]; then
+    SCRIPT="$LINK"
+  else
+    SCRIPT="$(cd "$(dirname "$SCRIPT")" && pwd)/$LINK"
+  fi
+done
+ROOT="$(cd "$(dirname "$SCRIPT")" && pwd)"
+export ROOT_DIR="$ROOT"
+
+# Project metadata (override via config.env)
+DOCKER_LAB_NAME="Docker Lab"
+DOCKER_LAB_VERSION="1.0.0"
+DOCKER_LAB_TAGLINE="Lima + Debian 13 + Docker Engine for Apple Silicon"
+DOCKER_LAB_AUTHOR="Nasr Aldin"
+DOCKER_LAB_WEBSITE="https://nasraldin.com"
+DOCKER_LAB_FOOTER="Local Docker lab tooling for your Mac — not Docker Desktop."
+if [[ -f "$ROOT/config.env" ]]; then
+  # shellcheck source=/dev/null
+  set -a; source "$ROOT/config.env"; set +a
+fi
+
+DUCKER_COMMANDS=(
+  install deps config lima daemon verify doctor
+  start stop restart status list shell
+  ui test test-run
+  vm-uninstall lab-uninstall uninstall uninstall-host purge nuke clean
+  sync-home-template
+  cli-install cli-uninstall
+  help version about
+)
+
+run_make() {
+  # Always invoke Make from the repo so relative paths / conditional ui/ branch work
+  make -C "$ROOT" --no-print-directory "$@"
+}
+
+usage() {
+  cat <<'EOF'
+ducker — docker-lab CLI (macOS + Lima + Docker)
+
+Usage:
+  ducker <command> [args...]
+
+Setup (one-shot):
+  install                 Full lab: deps + config + lima + daemon + verify
+  deps|config|lima|daemon Re-run one install piece (override)
+  verify                  Health checks
+  doctor                  status + verify
+  test                    Project self-test (LIVE=1 for running VM)
+  test-run                alpine + stress-ng smoke test
+
+Lifecycle:
+  start|stop|restart      Lima VM
+  status|list             VM + Docker status
+  shell                   Shell into the Lima guest
+
+Optional UI:
+  ui <cmd> [provider]     e.g. ducker ui install dockhand
+                          providers: arcane | dockhand
+
+Cleanup:
+  vm-uninstall            Delete Lima VM only
+  lab-uninstall           VM + managed host shell/CLI config
+  nuke                    Full wipe (CONFIRM=yes to skip prompt)
+
+CLI symlink:
+  cli-install             Install this command globally (ducker)
+  cli-uninstall           Remove global symlink
+
+Help:
+  help|-h|--help          This help
+  about                   Project info card (author, versions, runtime)
+  version                 Short version string
+
+Examples:
+  ducker install
+  ducker status
+  ducker ui install
+  ducker ui install dockhand
+  ducker ui open
+  ducker test
+  LIVE=1 ducker test
+EOF
+}
+
+cli_path() {
+  if command -v ducker >/dev/null 2>&1; then
+    command -v ducker
+  else
+    printf '%s/ducker' "$ROOT"
+  fi
+}
+
+global_link_info() {
+  if [[ -L /usr/local/bin/ducker ]]; then
+    printf '/usr/local/bin/ducker -> %s' "$(readlink /usr/local/bin/ducker)"
+  elif [[ -L "${HOME}/.local/bin/ducker" ]]; then
+    printf '%s/.local/bin/ducker -> %s' "$HOME" "$(readlink "${HOME}/.local/bin/ducker")"
+  else
+    printf '(not linked — run: ducker cli-install)'
+  fi
+}
+
+lima_runtime_info() {
+  local ver status="not installed"
+  if ! command -v limactl >/dev/null 2>&1; then
+    printf 'Lima (not installed)'
+    return
+  fi
+  ver="$(limactl --version 2>/dev/null | awk '{print $NF; exit}')"
+  if limactl list -q 2>/dev/null | grep -qx docker; then
+    status="$(limactl list -f '{{.Name}} {{.Status}}' 2>/dev/null | awk '$1=="docker"{print $2; exit}')"
+    printf 'Lima %s (instance docker: %s)' "${ver:-?}" "${status:-unknown}"
+  else
+    printf 'Lima %s (no docker instance — run: ducker install)' "${ver:-?}"
+  fi
+}
+
+docker_runtime_info() {
+  local host sock ver eng
+  host="${DOCKER_HOST:-unix://${HOME}/.lima/docker/sock/docker.sock}"
+  sock="${host#unix://}"
+  if ! command -v docker >/dev/null 2>&1; then
+    printf 'Docker CLI (not installed)'
+    return
+  fi
+  ver="$(docker --version 2>/dev/null | head -1)"
+  if DOCKER_HOST="${host}" DOCKER_CONTEXT= docker info >/dev/null 2>&1; then
+    eng="$(DOCKER_HOST="${host}" DOCKER_CONTEXT= docker version --format '{{.Server.Version}}' 2>/dev/null || echo '?')"
+    printf '%s (engine %s via Lima)' "${ver}" "${eng}"
+  elif [[ -S "${sock}" ]]; then
+    printf '%s (socket present, daemon not ready)' "${ver}"
+  else
+    printf '%s (Warning: could not connect to Lima Docker socket)' "${ver}"
+  fi
+}
+
+ui_default_info() {
+  local def="${ROOT}/apps/ui/.default"
+  if [[ -f "${def}" ]]; then
+    tr -d '[:space:]' <"${def}"
+  else
+    printf '(none)'
+  fi
+}
+
+hardware_chip() {
+  system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Chip:/ {print $2; exit}'
+}
+
+hardware_memory() {
+  system_profiler SPHardwareDataType 2>/dev/null | awk -F': ' '/Memory:/ {print $2; exit}'
+}
+
+version_info() {
+  printf '%s v%s\n' "${DOCKER_LAB_NAME}" "${DOCKER_LAB_VERSION}"
+  printf 'CLI:  %s\n' "$(cli_path)"
+  printf 'Lab:  %s\n' "$ROOT"
+}
+
+about() {
+  local chip mem runtime docker_rt ui_def cmds
+  chip="$(hardware_chip)"
+  mem="$(hardware_memory)"
+  runtime="$(lima_runtime_info)"
+  docker_rt="$(docker_runtime_info)"
+  ui_def="$(ui_default_info)"
+  cmds="${#DUCKER_COMMANDS[@]}"
+
+  cat <<EOF
+🐳 ${DOCKER_LAB_NAME}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Author      ${DOCKER_LAB_AUTHOR}
+  Website     ${DOCKER_LAB_WEBSITE}
+
+  Version     ${DOCKER_LAB_VERSION}
+  Tagline     ${DOCKER_LAB_TAGLINE}
+  CLI path    $(cli_path)
+  Global      $(global_link_info)
+  Lab root    ${ROOT}
+  Makefile    ${ROOT}/Makefile
+  Template    ${ROOT}/lima-docker.yaml
+  Config      ${ROOT}/config.env
+  Daemon JSON ${ROOT}/config/daemon.json
+
+  Runtime     ${runtime}
+  Docker      ${docker_rt}
+  Platform    ${chip:-Apple Silicon}
+  Memory      ${mem:-unknown}
+  DOCKER_HOST unix://${HOME}/.lima/docker/sock/docker.sock
+  UI default  ${ui_def}
+
+  Features    lima · vz · virtiofs · rosetta · rootless docker · buildx · compose · multi-UI
+
+  Commands    ${cmds} available — run: ducker help
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${DOCKER_LAB_FOOTER}
+EOF
+}
+
+cli_install() {
+  local target_link=""
+  local mode="${1:-auto}"
+
+  chmod +x "$ROOT/ducker"
+
+  if [[ "$mode" == "user" ]] || [[ "$mode" == "auto" && ! -w /usr/local/bin && -d "${HOME}/.local/bin" ]]; then
+    mkdir -p "${HOME}/.local/bin"
+    ln -sf "$ROOT/ducker" "${HOME}/.local/bin/ducker"
+    target_link="${HOME}/.local/bin/ducker"
+    echo "==> Linked ${target_link} -> $ROOT/ducker"
+    case ":$PATH:" in
+      *":${HOME}/.local/bin:"*) ;;
+      *)
+        echo "WARN: ~/.local/bin is not on PATH. Add to ~/.zshrc:"
+        echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+        ;;
+    esac
+  else
+    if [[ -w /usr/local/bin ]]; then
+      ln -sf "$ROOT/ducker" /usr/local/bin/ducker
+    else
+      echo "==> Need sudo to link into /usr/local/bin"
+      sudo ln -sf "$ROOT/ducker" /usr/local/bin/ducker
+    fi
+    target_link="/usr/local/bin/ducker"
+    echo "==> Linked ${target_link} -> $ROOT/ducker"
+  fi
+  echo "==> Try: ducker help"
+  command -v ducker >/dev/null && ducker about || true
+}
+
+cli_uninstall() {
+  local removed=0
+  for p in /usr/local/bin/ducker "${HOME}/.local/bin/ducker"; do
+    if [[ -L "$p" || -f "$p" ]]; then
+      if [[ -w "$(dirname "$p")" ]]; then
+        rm -f "$p"
+      else
+        sudo rm -f "$p"
+      fi
+      echo "==> Removed $p"
+      removed=1
+    fi
+  done
+  [[ "$removed" -eq 1 ]] || echo "==> No global ducker symlink found"
+}
+
+CMD="${1:-help}"
+shift || true
+
+case "$CMD" in
+  help|-h|--help)
+    usage
+    ;;
+  about)
+    about
+    ;;
+  version|--version|-V)
+    version_info
+    ;;
+  install|deps|config|lima|daemon|verify|doctor|test|test-run| \
+  start|stop|restart|status|shell| \
+  vm-uninstall|lab-uninstall|uninstall|uninstall-host|purge|nuke|clean| \
+  sync-home-template)
+    # Pass through env like CONFIRM=yes LIVE=1
+    run_make "$CMD" "$@"
+    ;;
+  list|ls)
+    # Friendly alias matching `ai list` style
+    run_make status
+    ;;
+  ui)
+    # make ui <subcommand> [provider…]
+    run_make ui "$@"
+    ;;
+  cli-install)
+    cli_install "${1:-auto}"
+    ;;
+  cli-uninstall)
+    cli_uninstall
+    ;;
+  *)
+    echo "ERROR: unknown command '${CMD}'" >&2
+    echo "Run: ducker help" >&2
+    exit 1
+    ;;
+esac

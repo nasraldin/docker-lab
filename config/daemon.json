@@ -1,0 +1,11 @@
+{
+  "features": {
+    "cdi": true,
+    "containerd-snapshotter": true
+  },
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}

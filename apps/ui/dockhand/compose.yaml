@@ -1,0 +1,20 @@
+# Provider: dockhand (https://dockhand.pro)
+# Optional Docker UI — install via: make ui install dockhand
+
+name: ui-dockhand
+
+services:
+  ui:
+    image: fnsys/dockhand:latest
+    container_name: ui-dockhand
+    ports:
+      - "${UI_PORT:-9090}:3000"
+    volumes:
+      - ${DOCKER_SOCK}:/var/run/docker.sock
+      - ui-data:/app/data
+    environment:
+      TZ: ${TZ:-UTC}
+    restart: unless-stopped
+
+volumes:
+  ui-data:

@@ -1,0 +1,18 @@
+# Secrets / local overrides
+apps/ui/.env
+apps/ui/**/.env
+apps/ui/.default
+**/.env
+!.env.example
+!config.env
+
+# Local E2E artifacts
+.e2e-results.log
+.e2e-console.log
+
+
+# Local clutter
+.DS_Store
+*.log
+lima.REJECTED.yaml
+.firecrawl/

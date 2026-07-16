@@ -1,0 +1,31 @@
+# Provider: arcane (https://getarcane.app)
+# Optional Docker UI — install via: make ui install arcane
+
+name: ui-arcane
+
+services:
+  ui:
+    image: ghcr.io/getarcaneapp/manager:latest
+    container_name: ui-arcane
+    ports:
+      - "${UI_PORT:-3552}:3552"
+    volumes:
+      - ${DOCKER_SOCK}:/var/run/docker.sock
+      - ui-data:/app/data
+    environment:
+      APP_URL: ${APP_URL:-http://localhost:3552}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in apps/ui/arcane/.env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in apps/ui/arcane/.env}
+      TZ: ${TZ:-UTC}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/app/arcane", "health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  ui-data:
