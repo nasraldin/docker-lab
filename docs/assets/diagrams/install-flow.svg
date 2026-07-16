@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1042" height="150" viewBox="0 0 1042 150" role="img" aria-label="Docker Lab install flow">
+  <defs>
+    <style>
+      .title { font: 700 15px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
+      .label { font: 600 13px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
+      .label-w { font: 600 13px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #FFFFFF; }
+      .small { font: 500 11px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #5A6A7A; }
+      .small-w { font: 500 11px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: rgba(255,255,255,0.9); }
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#00897B"/>
+    </marker>
+  </defs>
+  <rect width="1042" height="150" rx="12" fill="#FAFBFC"/>
+  <text class="title" x="24" y="28">Docker Lab — install path</text>
+  <rect x="24" y="48" width="118" height="56" rx="8" fill="#00695C"/>
+  <text class="label-w" x="83.0" y="77.0" text-anchor="middle">ducker install</text>
+  <line x1="146" y1="76.0" x2="166" y2="76.0" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="170" y="44" width="118" height="64" rx="8" fill="#00897B"/>
+  <text class="label-w" x="229.0" y="70.0" text-anchor="middle">Dependencies</text>
+  <text class="small-w" x="229.0" y="87.0" text-anchor="middle">Brewfile</text>
+  <line x1="292" y1="76.0" x2="312" y2="76.0" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="316" y="44" width="118" height="64" rx="8" fill="#00897B"/>
+  <text class="label-w" x="375.0" y="70.0" text-anchor="middle">Lima</text>
+  <text class="small-w" x="375.0" y="87.0" text-anchor="middle">Debian 13</text>
+  <line x1="438" y1="76.0" x2="458" y2="76.0" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="462" y="44" width="118" height="64" rx="8" fill="#00897B"/>
+  <text class="label-w" x="521.0" y="70.0" text-anchor="middle">Docker</text>
+  <text class="small-w" x="521.0" y="87.0" text-anchor="middle">rootless</text>
+  <line x1="584" y1="76.0" x2="604" y2="76.0" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="608" y="44" width="118" height="64" rx="8" fill="#00897B"/>
+  <text class="label-w" x="667.0" y="70.0" text-anchor="middle">Config</text>
+  <text class="small-w" x="667.0" y="87.0" text-anchor="middle">DOCKER_HOST</text>
+  <line x1="730" y1="76.0" x2="750" y2="76.0" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="754" y="44" width="118" height="64" rx="8" fill="#00897B"/>
+  <text class="label-w" x="813.0" y="70.0" text-anchor="middle">Verify</text>
+  <text class="small-w" x="813.0" y="87.0" text-anchor="middle">health checks</text>
+  <line x1="876" y1="76.0" x2="896" y2="76.0" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="900" y="48" width="118" height="56" rx="8" fill="#2E7D32"/>
+  <text class="label-w" x="959.0" y="77.0" text-anchor="middle">Ready</text>
+  <text class="small" x="24" y="138">One command. Re-run safe. UI is optional and separate.</text>
+</svg>

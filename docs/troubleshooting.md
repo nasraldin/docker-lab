@@ -1,6 +1,6 @@
 # Troubleshooting
 
-## Quick path
+## Start here
 
 ```bash
 ducker doctor
@@ -9,21 +9,21 @@ ducker diagnose
 ducker verify
 ```
 
-`ducker doctor --fix` applies structured repairs (host tools, CLI plugins, `DOCKER_HOST`, Lima restart, guest `daemon.json`, buildx). See [CLI reference — doctor](cli-reference.md#ducker-doctor).
+`ducker doctor --fix` tries the usual repairs (host tools, CLI plugins, `DOCKER_HOST`, Lima restart, guest `daemon.json`, buildx). Details: [CLI reference — doctor](cli-reference.md#ducker-doctor).
 
 ## Symptom → fix
 
 | Symptom | Fix |
 | --- | --- |
-| `field images must be set` | Use this repo’s `lima-docker.yaml` (has `base:` / images) |
-| Instance `Stopped`, no disk | `ducker doctor --fix` (force stop/start) or `limactl stop -f docker && limactl start docker` |
-| `another hostagent may already be running` | `ducker doctor --fix` or `limactl stop -f docker` then start |
-| `cliPluginsExtraDirs` in daemon.json → Docker won’t start | `ducker doctor --fix` re-applies known-good guest `daemon.json` |
+| `field images must be set` | Use this repo’s `lima-docker.yaml` (it has `base:` / images) |
+| Instance `Stopped`, no disk | `ducker doctor --fix`, or `limactl stop -f docker && limactl start docker` |
+| `another hostagent may already be running` | `ducker doctor --fix`, or `limactl stop -f docker` then start |
+| `cliPluginsExtraDirs` in daemon.json → Docker won’t start | `ducker doctor --fix` rewrites a known-good guest `daemon.json` |
 | buildx `default` error on `/var/run/docker.sock` | `ducker doctor --fix` (sets `DOCKER_HOST` + clears context) |
-| Compose/buildx “unknown command” | `ducker doctor --fix` (plugins + Brewfile) or `ducker deps` |
-| Docker unreachable but VM Running | `ducker doctor --fix` (socket wait + guest docker restart) |
+| Compose/buildx “unknown command” | `ducker doctor --fix` or `ducker deps` |
+| Docker unreachable but VM is Running | `ducker doctor --fix` (wait for socket + restart guest Docker) |
 | Harmless restart warning `127.0.0.1:5355 address already in use` | LLMNR collision — ignore unless you need that forward |
-| `manifest.v1+prettyjws is no longer supported` | Image too old — pick a maintained image |
+| `manifest.v1+prettyjws is no longer supported` | Image too old — pick a maintained one |
 | No Lima instance at all | `ducker install` (doctor will not create one) |
 
 ## Logs
@@ -39,18 +39,18 @@ limactl shell docker -- sudo tail -f /var/log/cloud-init-output.log
 limactl shell docker -- journalctl --user -u docker -f
 ```
 
-## What **not** to do
+## Don’t do these
 
-1. Do **not** put custom templates under `~/.lima/<name>/lima.yaml` as the primary workflow.
-2. Do **not** use bare Lima YAML without `images` / `base` on Lima 2.x.
-3. Do **not** configure rootless Docker via `/etc/docker/daemon.json`.
-4. Do **not** force `"storage-driver": "overlay2"` when using containerd snapshotter.
-5. Do **not** put host-only Docker CLI keys into guest `daemon.json`.
-6. Do **not** rely on `progrium/stress` on modern containerd.
-7. Do **not** create an extra buildx builder “just because” — default is fine.
-8. Do **not** give the VM nearly all host RAM/CPU.
+1. Don’t treat `~/.lima/<name>/lima.yaml` as your main template.
+2. Don’t feed Lima 2.x a YAML with no `images` / `base`.
+3. Don’t configure rootless Docker via `/etc/docker/daemon.json`.
+4. Don’t force `"storage-driver": "overlay2"` when using the containerd snapshotter.
+5. Don’t put host-only Docker CLI keys into guest `daemon.json`.
+6. Don’t rely on `progrium/stress` on modern containerd.
+7. Don’t create an extra buildx builder “just because” — default is fine.
+8. Don’t give the VM almost all of the host’s RAM/CPU.
 
-## Validation checklist
+## Quick checklist
 
 ```bash
 limactl list

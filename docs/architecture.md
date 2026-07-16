@@ -1,90 +1,67 @@
 # Architecture
 
-## Positioning
+This project is a small, repeatable Docker lab on a Mac: real Debian, rootless Engine, files you can put in git. The guest runs on Apple’s native Virtualization framework (`vz`) via Lima — not a heavyweight third-party hypervisor — so it stays easier on host CPU and RAM when you size the profile sanely. It is not “Docker Desktop with different branding.”
 
-Docker Lab is a **production-grade local Platform Engineering environment for Apple Silicon** — not a thin “Docker Desktop replacement.”
+What we care about:
 
-It optimizes for:
+- A Debian 13 guest you can reason about
+- Rootless Docker with a real `daemon.json`
+- Host `docker` talking to Lima over `DOCKER_HOST`
+- Native `vz` + virtiofs (and Rosetta when you need amd64)
+- Install / verify / doctor you can re-run without guessing
 
-- Reproducible Linux guests (Debian 13)
-- Rootless Docker Engine with a real `daemon.json`
-- Host CLI → Lima socket (`DOCKER_HOST`)
-- Idempotent install, verify, doctor, and GitOps-friendly config-as-code
+## Picture
 
-## Stack diagram
+![Stack: macOS → Homebrew → DOCKER_HOST → Lima/Debian → rootless Docker](assets/diagrams/stack.png)
 
-```text
-macOS (Apple Silicon)
-  └── Homebrew
-        ├── limactl
-        ├── docker (CLI)
-        ├── docker-compose (plugin)
-        └── docker-buildx (plugin)
-              │
-              ▼  DOCKER_HOST=unix://~/.lima/docker/sock/docker.sock
-        Lima VM (vz + virtiofs + Rosetta)
-              └── Debian 13 (aarch64)
-                    └── Docker Engine (rootless)
-                          └── containerd + runc
-                                └── containers
-```
+We’ve been validating against Lima `2.x` and Docker `29.x`.
 
-**Validated tooling (reference):** Lima `2.x`, Docker Client/Server `29.x`.
+## Details that actually bite people
 
-## Facts that matter
-
-| Topic | Fact |
+| Topic | What you get |
 | --- | --- |
-| Guest arch (`uname -m`) | `aarch64` (same silicon as macOS `arm64`) |
-| Docker platform | `linux/arm64` |
-| VM type | `vz` (Apple Virtualization) — prefer over `qemu` on Apple Silicon |
-| Mounts | VirtioFS via VZ — avoid hot paths like `node_modules` on Mac bind mounts |
-| Docker mode | **Rootless** in the default profile |
-| Storage | `overlayfs` via **containerd snapshotter** (not classic `overlay2` daemon flag) |
-| BuildKit | Built into the daemon; host needs `docker-buildx` plugin |
+| Guest arch | `aarch64` (same chips as macOS `arm64`) |
+| Image platform | `linux/arm64` |
+| VM type | `vz` — Apple’s native Virtualization.framework (stay on this for Apple Silicon) |
+| Mounts | VirtioFS — don’t put hot dirs like `node_modules` only on a Mac bind mount |
+| Docker | Rootless |
+| Storage | `overlayfs` via containerd snapshotter (not the old `overlay2` daemon flag) |
+| BuildKit | In the daemon; host still needs the `docker-buildx` plugin |
 
-## Lima 2.x rules
+## Lima 2.x gotchas
 
-1. A template **must** provide guest images (`images:` or `base: template:_images/...`).
-   A YAML with only `cpus` / `memory` / `disk` fails with: `field images must be set`.
-2. Keep templates **outside** `~/.lima/<instance>/` — that directory is for running instances.
-3. Prefer an explicit name: `limactl start --name=docker /path/to/lima-docker.yaml`.
+1. The template must have images (`images:` or `base: template:_images/...`). A YAML with only CPU/RAM/disk dies with `field images must be set`.
+2. Keep your template **outside** `~/.lima/<instance>/`. That folder is the running instance, not your source of truth.
+3. Start with an explicit name: `limactl start --name=docker /path/to/lima-docker.yaml`.
 
-Do **not** start from vanilla `template://docker` if you want Debian 13 — the official Docker template uses Ubuntu LTS.
+If you want Debian 13, don’t start from `template://docker` — that path is Ubuntu.
 
-## Resource sizing
+## Sizing
 
-Defaults match the `power` profile (M1 Max / 64 GB class hosts):
+Defaults line up with the `power` profile (think M1 Max / 64 GB class):
 
 | Resource | Default | Why |
 | --- | --- | --- |
-| CPUs | 8 | Strong builds without starving macOS |
-| Memory | 24 GiB | Postgres/Redis/Node stacks; leave headroom for macOS |
-| Disk | 200 GiB | Images, layers, build cache |
-| `vmType` | `vz` | Fastest path on Apple Silicon |
-| Rosetta | enabled | Run/build `linux/amd64` when needed |
+| CPUs | 8 | Builds without freezing the Mac |
+| Memory | 24 GiB | Room for DBs and apps; leave some for macOS |
+| Disk | 200 GiB | Images and build cache add up |
+| `vmType` | `vz` | Native Apple virtualization — lighter than QEMU-style stacks |
+| Rosetta | on | When you need `linux/amd64` |
 
-Use `ducker profile small|balanced|power` on smaller machines — see [installation.md](installation.md#profiles).
+Smaller machine? `ducker profile small` or `balanced` — see [installation](installation.md#profiles).
 
-## Install flow
+## What `ducker install` does
 
-```text
-ducker install
-  → deps (Brewfile)
-  → config (CLI plugins + DOCKER_HOST in ~/.zshrc)
-  → lima (create/start from lima-docker.yaml)
-  → daemon (guest ~/.config/docker/daemon.json + restart)
-  → verify
-```
+![What ducker install does: deps → config → lima → daemon → verify](assets/diagrams/install-steps.png)
 
-## Files on disk
+## Files you’ll touch
 
 | Path | Role |
 | --- | --- |
-| `lima-docker.yaml` | Source template |
-| `~/.lima/docker/` | Running instance (do not hand-edit as a template) |
-| `~/.docker/config.json` | Host CLI plugins (`cliPluginsExtraDirs`) |
+| `lima-docker.yaml` | Template you edit |
+| `~/.lima/docker/` | Live instance — don’t treat it as the template |
+| `~/.docker/config.json` | Host CLI plugins |
 | `~/.zshrc` | Managed `DOCKER_HOST` block |
-| Guest `~/.config/docker/daemon.json` | Rootless dockerd settings |
+| Guest `~/.config/docker/daemon.json` | Rootless dockerd |
 
 Next: [Docker daemon](docker-daemon.md) · [Performance](performance.md)

@@ -1,15 +1,15 @@
 # Docker daemon (rootless)
 
-Because this stack is **rootless**, the effective config is:
+This stack is **rootless**, so the config that matters is:
 
 ```text
 # inside Lima
 ~/.config/docker/daemon.json
 ```
 
-**Not** `/etc/docker/daemon.json` (ignored by rootless dockerd).
+Not `/etc/docker/daemon.json` — rootless dockerd ignores that.
 
-Inspect:
+Peek at it:
 
 ```bash
 ducker shell
@@ -17,9 +17,9 @@ ducker shell
 limactl shell docker -- cat ~/.config/docker/daemon.json
 ```
 
-## Recommended guest config
+## Guest config we ship
 
-Shipped as `config/daemon.json` and applied by `ducker daemon`:
+File: `config/daemon.json`, applied by `ducker daemon`:
 
 ```json
 {
@@ -35,7 +35,7 @@ Shipped as `config/daemon.json` and applied by `ducker daemon`:
 }
 ```
 
-Apply + restart:
+Apply and restart:
 
 ```bash
 ducker daemon
@@ -47,29 +47,29 @@ ducker daemon
 | --- | --- | --- |
 | `features.cdi` | Yes | Rosetta CDI device support |
 | `features.containerd-snapshotter` | Yes | Modern storage path (`overlayfs`) |
-| `log-opts` max-size/file | Yes if services run 24/7 | Rotates logs (~30 MB/container max) |
-| `storage-driver: overlay2` | **No** | Fights containerd snapshotter |
+| `log-opts` max-size/file | Yes if containers run a long time | Caps logs (~30 MB per container) |
+| `storage-driver: overlay2` | **No** | Fights the containerd snapshotter |
 | `features.buildkit: true` | **No** | Redundant on Docker 23+/29 |
-| `cliPluginsExtraDirs` | **Never in daemon.json** | Host CLI-only; breaks guest dockerd |
+| `cliPluginsExtraDirs` | **Never in daemon.json** | Host CLI only — breaks guest dockerd |
 
-Invalid keys prevent Docker from starting (`directives don't match any configuration option`).
+Bad keys stop Docker from starting (`directives don't match any configuration option`).
 
 ## Host CLI → Lima
 
-For a Lima-only machine, set `DOCKER_HOST` so the built-in `default` context works:
+Point the host CLI at Lima with `DOCKER_HOST` so the built-in `default` context works:
 
 ```bash
 export DOCKER_HOST=unix://${HOME}/.lima/docker/sock/docker.sock
 unset DOCKER_CONTEXT
 ```
 
-`ducker config` / `ducker install` writes this into `~/.zshrc` between managed markers.
+`ducker config` / `ducker install` write this into `~/.zshrc` between managed markers.
 
-### Why not `docker context` only?
+### Why not only `docker context`?
 
-Using only `DOCKER_CONTEXT=lima-docker` leaves `default` pointing at `/var/run/docker.sock` (Docker Desktop path). Then `docker buildx ls` shows a scary `default ... error` even though Lima works.
+If you only set `DOCKER_CONTEXT=lima-docker`, `default` still points at `/var/run/docker.sock` (Desktop’s path). Then `docker buildx ls` shows a scary `default ... error` even though Lima is fine.
 
-With `DOCKER_HOST`, `default` becomes Lima and BuildKit looks clean.
+With `DOCKER_HOST`, `default` is Lima and BuildKit looks clean.
 
 ## BuildKit / buildx
 
@@ -79,9 +79,9 @@ docker buildx ls
 docker build .
 ```
 
-**Default builder is enough.** Do not create `lima-builder` unless you need multi-node / advanced cache drivers.
+**The default builder is enough.** Don’t create `lima-builder` unless you need multi-node or fancy cache drivers.
 
-Rosetta (amd64) when needed:
+Rosetta (amd64) when you need it:
 
 ```bash
 docker run --platform=linux/amd64 --device=lima-vm.io/rosetta=cached --rm alpine uname -m
@@ -89,13 +89,13 @@ docker run --platform=linux/amd64 --device=lima-vm.io/rosetta=cached --rm alpine
 
 ## Log rotation
 
-With `max-size=10m` and `max-file=3`, Docker rotates files then drops the oldest. Existing containers may need recreate to pick up new log opts:
+With `max-size=10m` and `max-file=3`, Docker rotates then drops the oldest. Existing containers may need a recreate to pick up new log opts:
 
 ```bash
 docker compose up -d --force-recreate
 ```
 
-## Expected `docker info` highlights
+## What `docker info` should look like
 
 ```text
 Server Version: 29.x

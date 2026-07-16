@@ -174,8 +174,8 @@ fi
 assert_cmd "doctor.sh documents --fix coverage steps" \
   bash -c "grep -q 'fix_guest_daemon' '${ROOT_DIR}/scripts/doctor.sh' && grep -q 'fix_wait_docker_socket' '${ROOT_DIR}/scripts/doctor.sh' && grep -q 'fix_buildx_default' '${ROOT_DIR}/scripts/doctor.sh'"
 
-assert_cmd "README positions Platform Engineering" \
-  grep -qi 'Platform Engineering' "${ROOT_DIR}/README.md"
+assert_cmd "README mentions native vz / Apple Silicon" \
+  bash -c "grep -qi 'Apple Silicon' '${ROOT_DIR}/README.md' && grep -qE '\\bvz\\b|Virtualization' '${ROOT_DIR}/README.md'"
 
 assert_cmd "lima-docker.yaml references debian-13" \
   grep -q 'debian-13' "${ROOT_DIR}/lima-docker.yaml"

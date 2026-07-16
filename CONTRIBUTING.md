@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping improve Docker Lab.
+Thanks for helping with Docker Lab.
 
 ## Development
 
@@ -20,14 +20,14 @@ pip install -r requirements-docs.txt
 make docs-serve           # http://127.0.0.1:8000
 ```
 
-Details: [Docs site](https://nasraldin.github.io/docker-lab/docs-site/).
+More: [Docs site](https://nasraldin.github.io/docker-lab/docs-site/).
 
 ### CLI changes
 
-- Prefer thin Make targets + scripts under `scripts/`
-- Keep `ducker` as the public CLI surface
+- Keep Make targets thin; put logic in `scripts/`
+- Keep `ducker` as the public CLI
 - Run `shfmt -w -i 2 -ci` and `shellcheck -x -e SC1090,SC1091,SC2016` on shell changes
-- Update `scripts/test.sh` when adding required files or commands
+- Update `scripts/test.sh` when you add required files or commands
 
 ### Homebrew
 
@@ -37,11 +37,11 @@ See [Homebrew docs](https://nasraldin.github.io/docker-lab/homebrew/).
 
 ## Pull requests
 
-1. Keep PRs focused (one concern each)
-2. Ensure `make test` passes
-3. CI must be green (lint + static test; docs build on docs changes)
-4. Do not commit secrets, `apps/ui/**/.env`, `site/`, or `.venv-docs/`
+1. Keep PRs focused
+2. `make test` should pass
+3. CI must be green (lint + static test; docs build when docs change)
+4. Don’t commit secrets, `apps/ui/**/.env`, `site/`, or `.venv-docs/`
 
 ## Code of conduct
 
-Be respectful. This is a learning / Platform Engineering lab — document traps as carefully as features.
+Be respectful. Document traps as carefully as features.

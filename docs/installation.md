@@ -1,23 +1,25 @@
 # Installation
 
-## Requirements
+![Docker Lab install path](assets/diagrams/install-flow.png)
 
-- macOS on **Apple Silicon** (arm64)
+## What you need
+
+- A Mac with **Apple Silicon** (arm64)
 - [Homebrew](https://brew.sh)
-- Free disk for the Lima VM (default **200 GiB**; shrink via profile or `lima-docker.yaml`)
-- Willingness to allocate CPU/RAM to the VM (see [Profiles](#profiles))
+- Enough free disk for the VM (default is **200 GiB** — use a smaller [profile](#profiles) if that hurts)
+- Some CPU and RAM you’re willing to give the guest (don’t hand it everything)
 
-## Install paths
+## Ways to install
 
-### One-liner (recommended)
+### One-liner (easiest)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nasraldin/docker-lab/main/install.sh | bash
 ```
 
-This clones (or updates) the repo under `~/homelab/docker-lab`, links `ducker` on your PATH, then runs `ducker install`.
+That clones or updates `~/homelab/docker-lab`, puts `ducker` on your PATH, then runs `ducker install`.
 
-### Homebrew tap
+### Homebrew
 
 ```bash
 brew tap nasraldin/tools
@@ -25,7 +27,7 @@ brew install ducker-lab
 ducker install
 ```
 
-### From source
+### From a clone
 
 ```bash
 git clone https://github.com/nasraldin/docker-lab.git ~/homelab/docker-lab
@@ -34,9 +36,9 @@ cd ~/homelab/docker-lab
 ducker install
 ```
 
-`ducker install` is **idempotent**: deps → host config → Lima → daemon → verify. It does **not** install a UI.
+`ducker install` runs deps → host config → Lima → daemon → verify. You can run it again safely. It does **not** install a UI.
 
-## After install
+## After it finishes
 
 ```bash
 ducker status
@@ -45,7 +47,7 @@ ducker doctor
 ducker about
 ```
 
-Reload your shell if `DOCKER_HOST` was just written to `~/.zshrc`:
+If it just wrote `DOCKER_HOST` into `~/.zshrc`, reload:
 
 ```bash
 source ~/.zshrc
@@ -53,55 +55,55 @@ source ~/.zshrc
 
 ## Profiles
 
-Tune VM CPU, memory, and disk **before** first create (or recreate the VM after changing profile):
+Pick VM size **before** you create the instance (or delete and recreate after changing it):
 
-| Profile | CPUs | Memory | Disk | Use when |
+| Profile | CPUs | Memory | Disk | Good for |
 | --- | --- | --- | --- | --- |
-| `small` | 4 | 8 GiB | 60 GiB | Laptops with limited RAM |
-| `balanced` | 6 | 16 GiB | 120 GiB | Day-to-day Compose / builds |
-| `power` | 8 | 24 GiB | 200 GiB | Default — heavy builds & services |
+| `small` | 4 | 8 GiB | 60 GiB | Lighter machines |
+| `balanced` | 6 | 16 GiB | 120 GiB | Day-to-day work |
+| `power` | 8 | 24 GiB | 200 GiB | Heavier builds (default-ish) |
 
 ```bash
 ducker profile list
-ducker profile balanced      # writes active profile + patches lima template values
-ducker install               # or: ducker lima  (after a prior install)
+ducker profile balanced
+ducker install               # or ducker lima if you already installed once
 ```
 
-Do **not** give the VM nearly all host RAM/CPU.
+Leave headroom for macOS. Starving the host makes everything feel broken.
 
-## Optional Docker UI
+## Optional UI
 
-UI is opt-in (not part of `ducker install`):
+UIs are separate on purpose:
 
 | Provider | Port | Notes |
 | --- | --- | --- |
-| `dockhand` | 9090 | Default. First-run wizard creates admin |
-| `arcane` | 3552 | Login: `arcane` / `arcane-admin` |
+| `dockhand` | 9090 | Default. Wizard creates the admin user |
+| `arcane` | 3552 | Login starts as `arcane` / `arcane-admin` |
 
 ```bash
-ducker ui install                 # → dockhand
+ducker ui install                 # dockhand
 ducker ui install arcane
 ducker ui open
 ducker ui default dockhand
-ducker ui uninstall arcane        # UI only — does not delete the VM
+ducker ui uninstall arcane        # UI only — VM stays
 ```
 
-Secrets: `apps/ui/<provider>/.env` (gitignored). Default marker: `apps/ui/.default`.
+Secrets live in `apps/ui/<provider>/.env` (gitignored). Which UI is default is stored in `apps/ui/.default`.
 
-## Everyday commands
+## Day to day
 
 ```bash
 ducker start | stop | restart
 ducker status | stats | list
 ducker shell
-ducker upgrade                   # brew + re-apply config
-ducker backup                    # config snapshot
+ducker upgrade
+ducker backup
 ducker restore <backup-id>
 ```
 
 ## Makefile
 
-From the repo directory, `make` targets match `ducker` (`ducker` calls Make under the hood):
+From the repo, `make` talks to the same scripts `ducker` uses:
 
 ```bash
 make help
@@ -110,25 +112,25 @@ make test
 LIVE=1 make test
 ```
 
-## Wipe / reinstall
+## Wipe and start over
 
 ```bash
-ducker vm-uninstall              # delete Lima VM only (keeps ~/.lima/_config)
-ducker lab-uninstall             # VM + managed host shell/CLI config
-CONFIRM=yes ducker nuke          # full wipe including ~/.lima, brew packages, caches
-ducker install                   # fresh lab
+ducker vm-uninstall              # drop the docker VM only
+ducker lab-uninstall             # VM + managed shell/CLI bits
+CONFIRM=yes ducker nuke          # everything including ~/.lima and brew packages from the Brewfile
+ducker install
 ```
 
-`ducker nuke` removes the entire `~/.lima` directory (all Lima instances plus `_config` / `_networks`). Use `vm-uninstall` if you only want the `docker` instance gone.
+`nuke` removes all of `~/.lima` (every Lima instance, plus `_config` / `_networks`). Prefer `vm-uninstall` if you only want the `docker` VM gone.
 
-## Sources of truth
+## Where the truth lives
 
-| Path | Role |
+| Path | What it is |
 | --- | --- |
 | `Brewfile` | Host packages |
-| `lima-docker.yaml` | Lima template (Debian 13 + Docker) |
+| `lima-docker.yaml` | Lima template |
 | `config/daemon.json` | Guest rootless dockerd |
-| `config/profiles/` | `small` / `balanced` / `power` |
+| `config/profiles/` | small / balanced / power |
 | `apps/ui/<provider>/` | Optional UIs |
 
 Next: [Architecture](architecture.md) · [Troubleshooting](troubleshooting.md)

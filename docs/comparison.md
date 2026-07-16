@@ -1,29 +1,27 @@
 # Comparison
 
-Docker Lab vs common macOS Docker products:
+How Docker Lab stacks up against the usual Mac Docker options:
 
-| Feature | Docker Desktop | OrbStack | Docker Lab |
+| | Docker Desktop | OrbStack | Docker Lab |
 | --- | --- | --- | --- |
-| Open source | ❌ | ❌ | ✅ |
-| Debian guest | ❌ | ❌ | ✅ |
-| Rootless Docker | ✅ | ✅ | ✅ |
-| Custom daemon.json | Limited | Partial | ✅ |
-| GitOps-ready config | ❌ | ❌ | ✅ |
-| Platform Engineering focus | ❌ | ❌ | ✅ |
-| One product CLI (`ducker`) | N/A | Partial | ✅ |
-| Optional self-hosted UIs | Built-in | Built-in | Arcane / Dockhand |
-| License cost | Paid (teams) | Paid (pro) | MIT |
+| Open source | No | No | Yes |
+| Debian guest | No | No | Yes |
+| Rootless Docker | Yes | Yes | Yes |
+| Full control of `daemon.json` | Limited | Partial | Yes |
+| Config in the repo (Brewfile, Lima, daemon) | No | No | Yes |
+| CLI for install / verify / doctor | N/A | Partial | `ducker` |
+| Built-in UI | Yes | Yes | Optional (Dockhand / Arcane) |
+| Cost | Paid for teams | Paid for Pro | MIT |
 
-## When to choose Docker Lab
+## Pick Docker Lab if…
 
-- You want **Debian + rootless Engine** you fully control
-- You treat local infra as **code** (Brewfile, Lima YAML, daemon.json, Make/`ducker`)
-- You’re building habits toward **Kubernetes / GitOps / Platform Engineering**
-- You prefer open source and no Desktop license
+- You want Debian + rootless Engine on native Apple `vz` (lighter host impact) and you want to own the config files
+- You’re fine with a little YAML and a CLI
+- You’re heading toward Kubernetes / GitOps-style local labs later
 
-## When another tool may fit better
+## Pick something else if…
 
-- You need a polished GUI-first experience with zero YAML
-- You want the absolute simplest “just works” click-install for non-engineers
+- You want a polished GUI and almost no terminal
+- You need the simplest click-install for people who won’t touch Lima YAML
 
-Those are valid — Docker Lab optimizes for **operators and platform engineers**, not for hiding the Linux underneath.
+That’s fine — this project is aimed at people who want to see and control the Linux underneath.

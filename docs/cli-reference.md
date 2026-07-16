@@ -1,8 +1,8 @@
 # CLI reference
 
-Complete `ducker` command guide with **simulated terminal sessions** (command + typical output).
+Every `ducker` command with a sample terminal session (what you type + typical output).
 
-Outputs are representative of a healthy Apple Silicon lab after `ducker install`. Exact versions, paths, and timings vary by machine.
+These examples assume a healthy Apple Silicon lab after `ducker install`. Versions, paths, and timings will differ on your machine.
 
 !!! tip "How to read sessions"
     Lines starting with `$` are what you type. Everything below is example output.
@@ -51,9 +51,7 @@ Outputs are representative of a healthy Apple Silicon lab after `ducker install`
 
 ### `ducker help`
 
-**What it does:** Prints the full command list and examples.
-
-**When to use:** Anytime you forget a subcommand.
+Prints the full command list and examples — handy when you forget a subcommand.
 
 ```console
 $ ducker help
@@ -77,9 +75,7 @@ Also accepted: `ducker -h`, `ducker --help`.
 
 ### `ducker version`
 
-**What it does:** Short version + CLI / lab paths (no emoji card).
-
-**When to use:** Scripts, support tickets, quick checks.
+Short version + CLI / lab paths (no emoji card). Useful for scripts and quick checks.
 
 ```console
 $ ducker version
@@ -92,9 +88,7 @@ Lab:  /Users/you/homelab/docker-lab
 
 ### `ducker about`
 
-**What it does:** Rich info card — author, version, paths, Lima/Docker runtime, profile, UI default.
-
-**When to use:** First thing after install; debugging “which lab am I talking to?”
+Rich info card — author, version, paths, Lima/Docker runtime, profile, UI default. Good first check after install, or when you’re unsure which lab you’re talking to.
 
 ```console
 $ ducker about
@@ -105,7 +99,7 @@ $ ducker about
   Website     https://nasraldin.com
 
   Version     1.0.0
-  Tagline     Production-grade local Platform Engineering for Apple Silicon
+  Tagline     Native Linux Docker on Apple Silicon (vz)
   CLI path    /Users/you/.local/bin/ducker
   Global      /Users/you/.local/bin/ducker -> /Users/you/homelab/docker-lab/ducker
   Lab root    /Users/you/homelab/docker-lab
@@ -127,16 +121,14 @@ $ ducker about
   Commands    40 available — run: ducker help
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Local platform engineering lab — not Docker Desktop.
+Lima + native vz — light on the Mac, not Docker Desktop.
 ```
 
 ---
 
 ### `ducker cli-install`
 
-**What it does:** Symlinks this repo’s `ducker` into `~/.local/bin` or `/usr/local/bin` so you can run it from any directory.
-
-**When to use:** After cloning; after moving the repo.
+Symlinks this repo’s `ducker` into `~/.local/bin` or `/usr/local/bin` so you can run it from any directory. Run after cloning or moving the repo.
 
 ```console
 $ ./ducker cli-install
@@ -154,7 +146,7 @@ $ ./ducker cli-install
 
 ### `ducker cli-uninstall`
 
-**What it does:** Removes the global `ducker` symlink (does **not** delete the lab or VM).
+Removes the global `ducker` symlink (does **not** delete the lab or VM).
 
 ```console
 $ ducker cli-uninstall
@@ -167,10 +159,8 @@ $ ducker cli-uninstall
 
 ### `ducker install`
 
-**What it does:** Idempotent one-shot: `deps` → `config` → `lima` → `daemon` → `verify`.  
-Does **not** install a UI (keep that opt-in).
-
-**When to use:** Fresh Mac, or re-run after nuking.
+Idempotent one-shot: `deps` → `config` → `lima` → `daemon` → `verify`.  
+Does **not** install a UI (keep that opt-in). Use on a fresh Mac, or re-run after a nuke.
 
 ```console
 $ ducker install
@@ -195,7 +185,7 @@ First boot downloads the Debian image and expands the disk — expect several mi
 
 ### `ducker deps` / `config` / `lima` / `daemon`
 
-**What they do:** Re-run one piece of install after you change something.
+Re-run one piece of install after you change something.
 
 | Command | Re-runs |
 | --- | --- |
@@ -221,7 +211,7 @@ $ ducker lima
 
 ### `ducker profile`
 
-**What it does:** Lists or applies VM resource profiles (`cpus` / `memory` / `disk` in `lima-docker.yaml`).
+Lists or applies VM resource profiles (`cpus` / `memory` / `disk` in `lima-docker.yaml`).
 
 | Profile | CPUs | Memory | Disk |
 | --- | --- | --- | --- |
@@ -229,7 +219,7 @@ $ ducker lima
 | `balanced` | 6 | 16 GiB | 120 GiB |
 | `power` | 8 | 24 GiB | 200 GiB |
 
-**When to use:** Before first create, or before recreating the VM on a smaller Mac.
+Use a profile before first create, or before recreating the VM on a smaller Mac.
 
 ```console
 $ ducker profile list
@@ -265,9 +255,7 @@ Active profile: balanced
 
 ### `ducker verify`
 
-**What it does:** Host tools, Lima instance, Docker Engine, snapshotter, rootless, buildx, `hello-world`.
-
-**When to use:** After install, after upgrade, before filing a bug.
+Checks host tools, Lima, Docker Engine, snapshotter, rootless, buildx, and `hello-world`. Run after install or upgrade, and before filing a bug.
 
 ```console
 $ ducker verify
@@ -296,9 +284,7 @@ OS=Debian GNU/Linux 13 (trixie) Arch=aarch64
 
 ### `ducker doctor`
 
-**What it does:** Runs `status` then `verify`. With `--fix`, applies a structured set of common repairs, then verifies again.
-
-**When to use:** First response to “Docker feels broken.”
+Runs `status` then `verify`. With `--fix`, applies the usual repairs, then verifies again. Start here when Docker feels broken.
 
 ```console
 $ ducker doctor
@@ -374,9 +360,7 @@ Does **not** create a missing Lima instance — run `ducker install` (or `ducker
 
 ### `ducker diagnose`
 
-**What it does:** Verbose dump — host tools, Lima list, Docker info/context/buildx, profile, hostagent log tail, next-step hints.
-
-**When to use:** Before opening an issue; paste relevant sections into the bug report.
+Verbose dump — host tools, Lima list, Docker info/context/buildx, profile, hostagent log tail, and next-step hints. Handy before opening an issue; paste the relevant bits into the report.
 
 ```console
 $ ducker diagnose
@@ -408,9 +392,7 @@ docker    Running    6     16GiB    120GiB   ~/.lima/docker
 
 ### `ducker test` / `self-test`
 
-**What it does:** Project self-test (static by default). Set `LIVE=1` to also hit a Running VM.
-
-**When to use:** Before release; after changing scripts/Makefile.
+Project self-test (static by default). Set `LIVE=1` to also hit a Running VM. Run before a release, or after changing scripts/Makefile.
 
 ```console
 $ ducker test
@@ -439,7 +421,7 @@ $ LIVE=1 ducker test
 
 ### `ducker test-run`
 
-**What it does:** Quick smoke: `alpine uname` + short `stress-ng` run (needs Running VM).
+Quick smoke: `alpine uname` + short `stress-ng` run (needs Running VM).
 
 ```console
 $ ducker test-run
@@ -451,9 +433,7 @@ Linux ... aarch64 GNU/Linux
 
 ### `ducker benchmark`
 
-**What it does:** Times guest disk write, `docker pull alpine`, `hello-world`, and a short stress-ng run.
-
-**When to use:** Compare profiles; baseline before/after upgrades.
+Times guest disk write, `docker pull alpine`, `hello-world`, and a short stress-ng run. Useful to compare profiles or baseline before/after upgrades.
 
 ```console
 $ ducker benchmark
@@ -473,7 +453,7 @@ $ ducker benchmark
 
 ### `ducker start` / `stop` / `restart`
 
-**What they do:** Lima VM lifecycle for the `docker` instance.
+Lima VM lifecycle for the `docker` instance.
 
 ```console
 $ ducker start
@@ -486,7 +466,7 @@ $ ducker restart
 
 ### `ducker status` / `list`
 
-**What it does:** `limactl list` + short Docker server line.
+`limactl list` + short Docker server line.
 
 ```console
 $ ducker status
@@ -502,7 +482,7 @@ Server=29.0.0 OS=Debian GNU/Linux 13 (trixie) Arch=aarch64
 
 ### `ducker stats`
 
-**What it does:** Guest CPU/mem/disk summary + `docker stats` (Ctrl+C to quit if streaming).
+Guest CPU/mem/disk summary + `docker stats` (Ctrl+C to quit if streaming).
 
 ```console
 $ ducker stats
@@ -524,7 +504,7 @@ CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT
 
 ### `ducker shell`
 
-**What it does:** Interactive shell inside the Debian guest.
+Interactive shell inside the Debian guest.
 
 ```console
 $ ducker shell
@@ -537,9 +517,7 @@ you@lima-docker:~$ exit
 
 ### `ducker upgrade`
 
-**What it does:** `brew update` / Brewfile packages, re-apply host config + guest daemon, then `verify` if the VM is Running.
-
-**When to use:** After Homebrew updates; periodic maintenance.
+Runs `brew update` / Brewfile packages, re-applies host config + guest daemon, then `verify` if the VM is Running. Use after Homebrew updates, or as periodic maintenance.
 
 ```console
 $ ducker upgrade
@@ -559,7 +537,7 @@ $ ducker upgrade
 
 ### `ducker backup`
 
-**What it does:** Snapshots lab config under `~/.local/share/docker-lab/backups/<id>/`.  
+Snapshots lab config under `~/.local/share/docker-lab/backups/<id>/`.  
 Add `--vm` to also archive `~/.lima/docker` (large; stops the VM first).
 
 ```console
@@ -587,7 +565,7 @@ $ ducker backup --vm
 
 ### `ducker restore`
 
-**What it does:** Restores config from a backup id. Add `--vm` only if that backup includes a VM archive.
+Restores config from a backup id. Add `--vm` only if that backup includes a VM archive.
 
 ```console
 $ ducker restore 20260716-201500
@@ -607,7 +585,7 @@ $ ducker restore 20260716-203012 --vm
 
 ### `ducker ui`
 
-**What it does:** Manage optional Docker UIs. Default provider when omitted: **dockhand**.
+Manage optional Docker UIs. Default provider when omitted: **dockhand**.
 
 | Subcommand | Purpose |
 | --- | --- |
@@ -668,7 +646,7 @@ $ ducker ui uninstall arcane
 
 ### `ducker vm-uninstall`
 
-**What it does:** Deletes the Lima `docker` instance only (brew packages and `~/.zshrc` block stay).
+Deletes the Lima `docker` instance only (brew packages and `~/.zshrc` block stay).
 
 ```console
 $ ducker vm-uninstall
@@ -682,7 +660,7 @@ $ ducker vm-uninstall
 
 ### `ducker lab-uninstall`
 
-**What it does:** VM + managed host shell/CLI config (`DOCKER_HOST` block, plugins entry).
+VM + managed host shell/CLI config (`DOCKER_HOST` block, plugins entry).
 
 ```console
 $ ducker lab-uninstall
@@ -696,7 +674,7 @@ $ ducker lab-uninstall
 
 ### `ducker nuke`
 
-**What it does:** Full wipe — VM, **entire** `~/.lima`, Lima caches, managed host config, Brewfile formulae, UI local state, lab backups under `~/.local/share/docker-lab`.  
+Full wipe — VM, **entire** `~/.lima`, Lima caches, managed host config, Brewfile formulae, UI local state, lab backups under `~/.local/share/docker-lab`.  
 Does **not** delete this git repo.
 
 !!! danger "Destructive"

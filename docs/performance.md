@@ -1,10 +1,10 @@
 # Performance
 
-## Mount strategy
+## Mounts
 
-Mac bind mounts (VirtioFS) are convenient but expensive for chatty trees.
+Mac bind mounts over VirtioFS are handy, but chatty trees get slow.
 
-Prefer **named volumes** for:
+Prefer **named volumes** for things like:
 
 - `node_modules`
 - `.next`
@@ -23,24 +23,24 @@ volumes:
 
 ## Benchmark
 
-Measure a baseline after install:
+After install, get a rough baseline:
 
 ```bash
 ducker benchmark
 ```
 
-Reports approximate timings for:
+It times:
 
-1. Guest disk write (dd inside Lima)
+1. Guest disk write (`dd` inside Lima)
 2. Image pull (`alpine`)
 3. Container start (`hello-world`)
 4. Optional short CPU stress (`stress-ng`)
 
-Use results to compare profiles (`small` vs `power`) or before/after upgrades.
+Useful for comparing profiles (`small` vs `power`) or before/after upgrades.
 
 ## Load test image
 
-`progrium/stress` uses obsolete manifest v1 and **fails** on containerd v2.1+. Use stress-ng:
+`progrium/stress` uses an old manifest and **fails** on containerd v2.1+. Use stress-ng:
 
 ```bash
 ducker test-run
@@ -49,15 +49,15 @@ docker run --rm ghcr.io/colinianking/stress-ng \
   --cpu 4 --vm 2 --vm-bytes 1G --timeout 30s --metrics-brief
 ```
 
-Healthy signs: `failed: 0`, no OOM. The `sched_autogroup_enabled` note is optional/benchmark-only.
+Healthy: `failed: 0`, no OOM. The `sched_autogroup_enabled` note is optional and only matters for benchmarks.
 
-## Resource headroom
+## Leave room for macOS
 
-Leave CPU/RAM for macOS. If the host feels sluggish:
+If the Mac feels sluggish:
 
 ```bash
 ducker profile balanced   # or small
-# recreate VM after profile change — see advanced.md
+# recreate the VM after a profile change — see advanced.md
 ```
 
 ## Stats

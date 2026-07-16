@@ -1,39 +1,30 @@
 # Roadmap
 
-## Identity
+## Where we are
 
-Today the project is often discovered as a “Docker Desktop alternative.”
+People often find this as a “Docker Desktop alternative.” Fair enough — it does that job.
 
-The stronger identity:
+The longer goal is simpler:
 
-> **A production-grade local Platform Engineering environment for Apple Silicon.**
-
-One CLI — `ducker` — bootstraps the local platform stack.
+> A local Docker / platform lab on Apple Silicon you can install, check, and rebuild with one CLI (`ducker`).
 
 ## Near term (Docker Lab)
 
 - [x] Idempotent `ducker install` + verify / doctor / test
 - [x] Optional UIs (Arcane, Dockhand)
-- [x] Docs split + CI lint/test
+- [x] Docs + CI lint/test
 - [x] `benchmark`, `upgrade`, `backup` / `restore`, profiles
-- [x] CLI reference with simulated command + output sessions
+- [x] CLI reference with sample command + output
 - [x] Homebrew tap (`ducker-lab`) + release workflow
-- [x] `ducker doctor --fix` coverage expansion
-- [ ] Screenshots (PNG) refreshed each release
+- [x] Broader `ducker doctor --fix`
+- [ ] Real CLI/UI PNG screenshots refreshed each release
+- [x] Diagram assets (install flow, stack, roadmap, release channels)
 
-## Mid term (Developer Platform CLI)
+## Mid term (more labs behind the same CLI)
 
-```text
-Docker Lab
-  → Compose Lab
-  → Kind Lab
-  → Talos Lab
-  → Kubernetes Lab
-  → GitOps Lab
-  → Platform Lab
-```
+![Roadmap from Docker Lab toward Compose, Kind, Talos, Kubernetes, GitOps, Platform Lab](assets/diagrams/roadmap.png)
 
-Intended CLI shape:
+Rough shape we want:
 
 ```bash
 ducker install docker
@@ -47,12 +38,12 @@ ducker install vault
 ducker install keycloak
 ```
 
-Same product habits: install → verify → doctor → upgrade → backup.
+Same habits everywhere: install → verify → doctor → upgrade → backup.
 
-## Principles that stay fixed
+## Things that shouldn’t change
 
-1. **Apple Silicon first**, documented traps included
-2. **Config as code** — no snowflake VMs
-3. **Validation story** — verify / doctor / test / benchmark
-4. **What not to do** — teach failure modes
-5. Grow into a **platform CLI**, not stop at “Docker works”
+1. **Apple Silicon first**, including the traps we document
+2. **Config as code** — no one-off snowflake VMs
+3. **A validation story** — verify / doctor / test / benchmark
+4. **What not to do** — teach the failure modes
+5. Grow into a wider platform CLI, not stop at “Docker works”

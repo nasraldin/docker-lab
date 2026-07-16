@@ -1,8 +1,8 @@
 # Advanced
 
-## Manual setup (understand / customize / debug)
+## Manual setup (for understanding or debugging)
 
-Automated path: `ducker install`. The steps below match what the scripts do.
+Normal path: `ducker install`. The steps below are roughly what the scripts do.
 
 ### 1. Host tools
 
@@ -10,7 +10,7 @@ Automated path: `ducker install`. The steps below match what the scripts do.
 brew install lima docker docker-compose docker-buildx yq jq
 ```
 
-Optional: `lima-additional-guestagents` only for **non-native** guest architectures. Skip for native `aarch64` Debian on Apple Silicon.
+Optional: `lima-additional-guestagents` only if the guest arch isn’t native. Skip that for `aarch64` Debian on Apple Silicon.
 
 Wire plugins in `~/.docker/config.json`:
 
@@ -28,7 +28,7 @@ Wire plugins in `~/.docker/config.json`:
 limactl start --name=docker /path/to/lima-docker.yaml
 ```
 
-First boot downloads the Debian cloud image and expands the disk — expect several minutes.
+First boot downloads the Debian cloud image and grows the disk — give it a few minutes.
 
 ### 3. Shell env
 
@@ -39,7 +39,7 @@ unset DOCKER_CONTEXT
 
 ### 4. Guest daemon
 
-See [docker-daemon.md](docker-daemon.md). Or: `ducker daemon`.
+See [docker-daemon.md](docker-daemon.md), or just run `ducker daemon`.
 
 ## Upgrade
 
@@ -47,34 +47,34 @@ See [docker-daemon.md](docker-daemon.md). Or: `ducker daemon`.
 ducker upgrade
 ```
 
-Safe sequence:
+What that does:
 
-1. `brew bundle` / upgrade Lima + Docker CLI packages
+1. Upgrade Lima + Docker CLI packages via Homebrew
 2. Re-apply host CLI + shell config
 3. Re-apply guest `daemon.json` and restart user Docker
-4. `ducker verify`
+4. Run `ducker verify`
 
 ## Backup / restore
 
 ```bash
-ducker backup                 # writes under ~/.local/share/docker-lab/backups/<id>/
+ducker backup                 # under ~/.local/share/docker-lab/backups/<id>/
 ducker backup --vm            # also stops VM and archives ~/.lima/docker (large)
 ducker restore <id>
 ducker restore <id> --vm
 ```
 
-Backups always include:
+A normal backup includes:
 
 - Active profile marker
 - Copies of `lima-docker.yaml`, `config/daemon.json`, `config.env`
 - Host `~/.docker/config.json` (if present)
-- Managed `~/.zshrc` snippet (extracted)
+- The managed bit of `~/.zshrc`
 
-`--vm` archives the Lima instance directory (stop first). Restore with care — it replaces the instance.
+`--vm` archives the Lima instance directory (VM is stopped first). Restore carefully — it replaces the instance.
 
-## Profiles after first create
+## Changing profile after first create
 
-Changing CPU/memory/disk in the template does **not** resize a live instance automatically. Typical flow:
+Editing CPU/memory/disk in the template does **not** resize a live VM. Typical flow:
 
 ```bash
 ducker backup
@@ -91,10 +91,10 @@ ducker verify
 ducker sync-home-template   # cp lima-docker.yaml → ~/lima-docker.yaml
 ```
 
-## Homelab learning path
+## Learning path
 
 ```text
-Linux → Docker → containerd → Compose → (later) kubeadm on Proxmox / Kind via ducker
+Linux → Docker → containerd → Compose → (later) Kind via ducker / kube elsewhere
 ```
 
-Keep heavy Kubernetes learning on dedicated nodes when possible; this Mac lab is for Docker-native Platform Engineering workflows first.
+Keep heavy Kubernetes learning on dedicated nodes when you can. This Mac lab is mainly for Docker-first workflows.

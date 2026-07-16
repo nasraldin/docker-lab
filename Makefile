@@ -229,6 +229,11 @@ docs-build: ## Build static docs site into ./site
 		exit 1; \
 	fi
 
+.PHONY: docs-diagrams
+docs-diagrams: ## Regenerate docs/assets/diagrams/*.svg and *.png
+	@command -v rsvg-convert >/dev/null 2>&1 || { echo "Need rsvg-convert (brew install librsvg)"; exit 1; }
+	@python3 "$(ROOT_DIR)/scripts/generate-diagrams.py"
+
 ##@ Cleanup
 
 .PHONY: vm-uninstall

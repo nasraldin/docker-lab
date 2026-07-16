@@ -7,51 +7,48 @@
 [![Downloads](https://img.shields.io/github/downloads/nasraldin/docker-lab/total.svg)](https://github.com/nasraldin/docker-lab/releases)
 [![Docs site](https://img.shields.io/badge/docs-GitHub%20Pages-teal)](https://nasraldin.github.io/docker-lab/)
 
-**A production-grade local Platform Engineering environment for Apple Silicon.**
+Run real Linux Docker on Apple Silicon — using Apple’s native Virtualization framework (`vz`), so it stays light on CPU and RAM instead of a heavyweight hypervisor stack. Debian 13 in Lima, rootless Engine, one CLI: **`ducker`**.
 
-Not “another Docker Desktop alternative” — a reproducible Linux Docker lab on macOS, managed by one CLI: **`ducker`**.
+![Docker Lab install path: ducker install → Dependencies → Lima → Docker → Config → Verify → Ready](docs/assets/diagrams/install-flow.png)
 
-```text
-ducker install  →  Dependencies  →  Lima  →  Docker  →  Config  →  Verify  →  Ready
-```
-
-Requires **macOS Apple Silicon (arm64)** and [Homebrew](https://brew.sh).
+You need **macOS on Apple Silicon** and [Homebrew](https://brew.sh).
 
 ---
 
-## Why Docker Lab?
+## Why bother?
 
-| Feature | Docker Desktop | OrbStack | Docker Lab |
+| | Docker Desktop | OrbStack | Docker Lab |
 | --- | --- | --- | --- |
-| Open source | ❌ | ❌ | ✅ |
-| Debian guest | ❌ | ❌ | ✅ |
-| Rootless Docker | ✅ | ✅ | ✅ |
-| Custom daemon.json | Limited | Partial | ✅ |
-| GitOps-ready as code | ❌ | ❌ | ✅ |
-| Platform Engineering focus | ❌ | ❌ | ✅ |
+| Open source | No | No | Yes |
+| Debian guest | No | No | Yes |
+| Rootless | Yes | Yes | Yes |
+| Full control of `daemon.json` | Limited | Partial | Yes |
+| Everything in git (Brewfile, Lima, daemon) | No | No | Yes |
 
-Stack: **Lima + Debian 13 + rootless Docker Engine** (vz, virtiofs, Rosetta).
+Stack under the hood: Lima + Debian 13 + rootless Docker on Apple’s native `vz` (plus virtiofs and Rosetta).
 
 ---
 
 ## Install
 
-### One-liner
+**One-liner**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nasraldin/docker-lab/main/install.sh | bash
 ```
 
-### Homebrew (tap)
+**Homebrew**
 
 ```bash
 brew tap nasraldin/tools
 brew install ducker-lab
 ```
 
-First-time tap setup and CI publish: [Homebrew docs](https://nasraldin.github.io/docker-lab/homebrew/).
+(The formula is `ducker-lab` because Homebrew already has an unrelated package named `ducker`. The CLI is still `ducker`.)
 
-### From source
+More on the tap: [Homebrew docs](https://nasraldin.github.io/docker-lab/homebrew/).
+
+**From git**
 
 ```bash
 git clone https://github.com/nasraldin/docker-lab.git ~/homelab/docker-lab
@@ -60,7 +57,7 @@ cd ~/homelab/docker-lab
 ducker install
 ```
 
-Then:
+Then check it:
 
 ```bash
 ducker status
@@ -68,80 +65,71 @@ ducker verify
 ducker doctor
 ```
 
-Optional UI:
+Optional UI (not part of install):
 
 ```bash
-ducker ui install          # Dockhand (default)
+ducker ui install          # Dockhand
 ducker ui install arcane
 ducker ui open
 ```
 
 ---
 
-## `ducker` at a glance
+## Handy commands
 
-| Command | What it does |
+| Command | Meaning |
 | --- | --- |
-| `ducker install` | Full lab one-shot (idempotent) |
-| `ducker verify` / `doctor` / `diagnose` | Health checks & diagnostics |
-| `ducker doctor --fix` | Apply common host/guest fixes |
-| `ducker status` / `stats` | VM + Docker status / live stats |
-| `ducker benchmark` | Disk I/O, pull, and build timing |
-| `ducker upgrade` | Safely update brew tools + re-apply config |
-| `ducker backup` / `restore` | Snapshot lab config (and optional VM) |
-| `ducker profile <name>` | Tune VM: `small` \| `balanced` \| `power` |
-| `ducker self-test` | Alias for `ducker test` |
-| `ducker ui …` | Optional Docker UIs |
-| `ducker nuke` | Full wipe (`CONFIRM=yes` to skip prompt) |
+| `ducker install` | Set up the whole lab (safe to re-run) |
+| `ducker verify` / `doctor` / `diagnose` | Health checks |
+| `ducker doctor --fix` | Try the usual fixes |
+| `ducker status` / `stats` | What’s running |
+| `ducker benchmark` | Rough speed check |
+| `ducker upgrade` | Update brew tools and re-apply config |
+| `ducker backup` / `restore` | Save / restore config (optional VM dump) |
+| `ducker profile <name>` | `small`, `balanced`, or `power` |
+| `ducker ui …` | Optional web UIs |
+| `ducker nuke` | Wipe everything (`CONFIRM=yes` skips the prompt) |
 
 ```bash
-ducker about               # project + runtime card
-ducker help                # full command list
-LIVE=1 ducker test         # runtime validation (needs Running VM)
+ducker about
+ducker help
+LIVE=1 ducker test         # needs a running VM
 ```
 
-See [Installation](https://nasraldin.github.io/docker-lab/installation/) for profiles, disk sizing, and day-to-day ops.
-Full command gallery: [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/).
+Install details: [Installation](https://nasraldin.github.io/docker-lab/installation/).  
+Every command with sample output: [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/).
 
 ---
 
-## Architecture
+## How it fits together
 
-```text
-macOS (Apple Silicon)
-  └── Homebrew → limactl, docker CLI, compose, buildx
-        │
-        ▼  DOCKER_HOST=unix://~/.lima/docker/sock/docker.sock
-  Lima VM (vz + virtiofs + Rosetta)
-        └── Debian 13 (aarch64)
-              └── Docker Engine (rootless) → containerd → containers
-```
+![Stack: macOS → Homebrew → DOCKER_HOST → Lima/Debian → rootless Docker](docs/assets/diagrams/stack.png)
 
-Details: [Architecture](https://nasraldin.github.io/docker-lab/architecture/)
+More detail: [Architecture](https://nasraldin.github.io/docker-lab/architecture/).
 
 ---
 
-## Documentation
+## Docs
 
-**Site:** [https://nasraldin.github.io/docker-lab/](https://nasraldin.github.io/docker-lab/)
+Site: [https://nasraldin.github.io/docker-lab/](https://nasraldin.github.io/docker-lab/)
 
-| Doc | Contents |
+| Page | About |
 | --- | --- |
-| [Installation](https://nasraldin.github.io/docker-lab/installation/) | Install paths, profiles, first boot |
-| [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/) | Every command + simulated terminal output |
-| [Architecture](https://nasraldin.github.io/docker-lab/architecture/) | Stack, Lima 2.x rules, sizing |
+| [Installation](https://nasraldin.github.io/docker-lab/installation/) | Install, profiles, first boot |
+| [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/) | Commands + example terminal output |
+| [Architecture](https://nasraldin.github.io/docker-lab/architecture/) | Stack and Lima gotchas |
 | [Docker daemon](https://nasraldin.github.io/docker-lab/docker-daemon/) | Rootless `daemon.json`, BuildKit |
-| [Performance](https://nasraldin.github.io/docker-lab/performance/) | Mounts, volumes, benchmarks |
-| [Troubleshooting](https://nasraldin.github.io/docker-lab/troubleshooting/) | Symptoms → fixes + what **not** to do |
-| [FAQ](https://nasraldin.github.io/docker-lab/faq/) | Common questions |
-| [Advanced](https://nasraldin.github.io/docker-lab/advanced/) | Manual setup, backup/restore, upgrade |
-| [Comparison](https://nasraldin.github.io/docker-lab/comparison/) | vs Docker Desktop / OrbStack |
-| [Roadmap](https://nasraldin.github.io/docker-lab/roadmap/) | Toward a Developer Platform CLI |
-| [Docs site](https://nasraldin.github.io/docker-lab/docs-site/) | Preview locally + GitHub Pages |
-| [Homebrew](https://nasraldin.github.io/docker-lab/homebrew/) | Tap setup + release automation |
-| [Releasing](https://nasraldin.github.io/docker-lab/releasing/) | Tags, Homebrew, GitHub Releases |
+| [Performance](https://nasraldin.github.io/docker-lab/performance/) | Mounts, benchmarks |
+| [Troubleshooting](https://nasraldin.github.io/docker-lab/troubleshooting/) | Broken? Start here |
+| [FAQ](https://nasraldin.github.io/docker-lab/faq/) | Short answers |
+| [Advanced](https://nasraldin.github.io/docker-lab/advanced/) | Manual steps, backup, upgrade |
+| [Comparison](https://nasraldin.github.io/docker-lab/comparison/) | vs Desktop / OrbStack |
+| [Roadmap](https://nasraldin.github.io/docker-lab/roadmap/) | Where this is going |
+| [Homebrew](https://nasraldin.github.io/docker-lab/homebrew/) | Tap and releases |
+| [Docs site](https://nasraldin.github.io/docker-lab/docs-site/) | Preview docs locally |
+| [Releasing](https://nasraldin.github.io/docker-lab/releasing/) | Tags and shipping |
 
-Source markdown lives in [`docs/`](docs/). Preview locally:
+Markdown lives in [`docs/`](docs/). To preview:
 
 ```bash
 python3 -m venv .venv-docs
@@ -152,31 +140,28 @@ make docs-serve
 
 ---
 
-## Validation
+## Checks
 
 ```bash
-ducker test                # static (safe anytime)
+ducker test                # static, safe anytime
 LIVE=1 ducker test         # needs Running VM
 ducker verify
 ducker doctor
-ducker benchmark           # optional performance baseline
+ducker benchmark
 ```
 
-CI on every PR: ShellCheck, shfmt, markdownlint, yamllint, actionlint, `make test`.
+PRs get ShellCheck, shfmt, markdownlint, yamllint, actionlint, and `make test`.
 
 ---
 
-## Roadmap (one CLI)
+## What’s next
 
-```text
-Docker Lab → Compose Lab → Kind / Talos → Kubernetes → GitOps → Platform Lab
-```
+![Roadmap from Docker Lab toward Compose, Kind, Talos, Kubernetes, GitOps, Platform Lab](docs/assets/diagrams/roadmap.png)
 
-Today: `ducker install` brings up Docker. Tomorrow: `ducker install kind`, `argocd`, `prometheus`, …  
-See [Roadmap](https://nasraldin.github.io/docker-lab/roadmap/).
+Today `ducker install` gets you Docker. Later the same CLI should grow into kind, Argo CD, and friends. See [Roadmap](https://nasraldin.github.io/docker-lab/roadmap/).
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — [LICENSE](LICENSE).

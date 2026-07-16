@@ -20,10 +20,10 @@ export ROOT_DIR="$ROOT"
 # Project metadata (override via config.env)
 DOCKER_LAB_NAME="Docker Lab"
 DOCKER_LAB_VERSION="1.0.0"
-DOCKER_LAB_TAGLINE="Production-grade local Platform Engineering for Apple Silicon"
+DOCKER_LAB_TAGLINE="Native Linux Docker on Apple Silicon (vz)"
 DOCKER_LAB_AUTHOR="Nasr Aldin"
 DOCKER_LAB_WEBSITE="https://nasraldin.com"
-DOCKER_LAB_FOOTER="Local platform engineering lab — not Docker Desktop."
+DOCKER_LAB_FOOTER="Lima + native vz — light on the Mac, not Docker Desktop."
 if [[ -f "$ROOT/config.env" ]]; then
   # shellcheck source=/dev/null
   set -a

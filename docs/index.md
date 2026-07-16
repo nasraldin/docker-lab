@@ -1,16 +1,12 @@
 # Docker Lab
 
-**A production-grade local Platform Engineering environment for Apple Silicon.**
+Run real Linux Docker on Apple Silicon without the usual Desktop tax. The VM rides Apple’s native Virtualization framework (`vz`), so you’re not dragging a heavy hypervisor around — better for CPU, RAM, and battery. Debian 13 in Lima, rootless Docker Engine, and a small CLI called **`ducker`** that installs and checks the whole thing.
 
-Not “another Docker Desktop alternative” — a reproducible Linux Docker lab on macOS, managed by one CLI: **`ducker`**.
+![Docker Lab install path: ducker install → Dependencies → Lima → Docker → Config → Verify → Ready](assets/diagrams/install-flow.png)
 
-```text
-ducker install  →  Dependencies  →  Lima  →  Docker  →  Config  →  Verify  →  Ready
-```
+Needs **macOS on Apple Silicon** and [Homebrew](https://brew.sh).
 
-Requires **macOS Apple Silicon (arm64)** and [Homebrew](https://brew.sh).
-
-## Quick install
+## Install
 
 === "One-liner"
 
@@ -43,41 +39,38 @@ ducker verify
 ducker doctor
 ```
 
-## Why Docker Lab?
+## Why this instead of Desktop?
 
-| Feature | Docker Desktop | OrbStack | Docker Lab |
+| | Docker Desktop | OrbStack | Docker Lab |
 | --- | --- | --- | --- |
-| Open source | ❌ | ❌ | ✅ |
-| Debian guest | ❌ | ❌ | ✅ |
-| Rootless Docker | ✅ | ✅ | ✅ |
-| Custom daemon.json | Limited | Partial | ✅ |
-| GitOps-ready as code | ❌ | ❌ | ✅ |
-| Platform Engineering focus | ❌ | ❌ | ✅ |
+| Open source | No | No | Yes |
+| Debian guest | No | No | Yes |
+| Rootless | Yes | Yes | Yes |
+| You own `daemon.json` | Limited | Partial | Yes |
+| Config lives in the repo | No | No | Yes |
 
-## `ducker` at a glance
+## Commands you’ll use most
 
-| Command | What it does |
+| Command | Meaning |
 | --- | --- |
-| `ducker install` | Full lab one-shot (idempotent) |
-| `ducker verify` / `doctor` / `diagnose` | Health checks & diagnostics |
-| `ducker doctor --fix` | Apply common host/guest fixes |
-| `ducker status` / `stats` | VM + Docker status / live stats |
-| `ducker benchmark` | Disk I/O, pull, and build timing |
-| `ducker upgrade` | Safely update brew tools + re-apply config |
-| `ducker backup` / `restore` | Snapshot lab config (and optional VM) |
-| `ducker profile <name>` | Tune VM: `small` \| `balanced` \| `power` |
-| `ducker ui …` | Optional Docker UIs (Dockhand default) |
-| `ducker nuke` | Full wipe (`CONFIRM=yes` to skip prompt) |
+| `ducker install` | Full setup (safe to re-run) |
+| `ducker verify` / `doctor` | Is it healthy? |
+| `ducker doctor --fix` | Apply the usual fixes |
+| `ducker status` / `stats` | What’s running |
+| `ducker upgrade` | Update tools + re-apply config |
+| `ducker backup` / `restore` | Snapshot config |
+| `ducker profile …` | `small` / `balanced` / `power` |
+| `ducker ui …` | Optional web UI (Dockhand by default) |
+| `ducker nuke` | Wipe the lab (`CONFIRM=yes` to skip prompt) |
 
-## Next steps
+## Where to go next
 
-- [Installation](installation.md) — profiles, first boot, UI
-- [CLI reference](cli-reference.md) — every command with simulated output
-- [Architecture](architecture.md) — Lima + Debian + rootless Docker
-- [Troubleshooting](troubleshooting.md) — symptoms, fixes, what **not** to do
-- [Roadmap](roadmap.md) — toward a Developer Platform CLI
-- [Docs site](docs-site.md) — preview locally with MkDocs / GitHub Pages
+- [Installation](installation.md) — profiles, disk size, first boot
+- [CLI reference](cli-reference.md) — every command with sample output
+- [Architecture](architecture.md) — how the pieces connect
+- [Troubleshooting](troubleshooting.md) — when something breaks
+- [Roadmap](roadmap.md) — longer-term plans
 
 ## Source
 
-GitHub: [nasraldin/docker-lab](https://github.com/nasraldin/docker-lab)
+[github.com/nasraldin/docker-lab](https://github.com/nasraldin/docker-lab)

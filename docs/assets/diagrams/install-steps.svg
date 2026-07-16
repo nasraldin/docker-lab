@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="364" viewBox="0 0 560 364" role="img" aria-label="ducker install steps">
+  <defs>
+    <style>
+      .title { font: 700 15px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
+      .label { font: 600 13px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
+      .label-w { font: 600 13px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #FFFFFF; }
+      .small { font: 500 11px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #5A6A7A; }
+      .small-w { font: 500 11px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: rgba(255,255,255,0.9); }
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#00897B"/>
+    </marker>
+  </defs>
+  <rect width="560" height="364" rx="12" fill="#FAFBFC"/>
+  <text class="title" x="24" y="28">What <tspan font-family="IBM Plex Mono, Menlo, monospace">ducker install</tspan> does</text>
+  <rect x="24" y="48" width="140" height="40" rx="8" fill="#00897B"/>
+  <text class="label-w" x="94" y="73" text-anchor="middle">1. deps</text>
+  <rect x="176" y="48" width="360" height="40" rx="8" fill="#E0F2F1"/>
+  <text class="label" x="192" y="73">Install Homebrew packages from Brewfile</text>
+  <line x1="94" y1="88" x2="94" y2="104" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="24" y="104" width="140" height="40" rx="8" fill="#00897B"/>
+  <text class="label-w" x="94" y="129" text-anchor="middle">2. config</text>
+  <rect x="176" y="104" width="360" height="40" rx="8" fill="#E0F2F1"/>
+  <text class="label" x="192" y="129">CLI plugins + DOCKER_HOST in ~/.zshrc</text>
+  <line x1="94" y1="144" x2="94" y2="160" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="24" y="160" width="140" height="40" rx="8" fill="#00897B"/>
+  <text class="label-w" x="94" y="185" text-anchor="middle">3. lima</text>
+  <rect x="176" y="160" width="360" height="40" rx="8" fill="#E0F2F1"/>
+  <text class="label" x="192" y="185">Create/start VM from lima-docker.yaml</text>
+  <line x1="94" y1="200" x2="94" y2="216" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="24" y="216" width="140" height="40" rx="8" fill="#00897B"/>
+  <text class="label-w" x="94" y="241" text-anchor="middle">4. daemon</text>
+  <rect x="176" y="216" width="360" height="40" rx="8" fill="#E0F2F1"/>
+  <text class="label" x="192" y="241">Apply guest daemon.json + restart Docker</text>
+  <line x1="94" y1="256" x2="94" y2="272" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="24" y="272" width="140" height="40" rx="8" fill="#00897B"/>
+  <text class="label-w" x="94" y="297" text-anchor="middle">5. verify</text>
+  <rect x="176" y="272" width="360" height="40" rx="8" fill="#E0F2F1"/>
+  <text class="label" x="192" y="297">Health checks until the lab is ready</text>
+  <text class="small" x="24" y="344">Safe to re-run. Does not install a UI.</text>
+</svg>

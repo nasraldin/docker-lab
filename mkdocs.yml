@@ -1,5 +1,5 @@
 site_name: Docker Lab
-site_description: Production-grade local Platform Engineering environment for Apple Silicon
+site_description: Native Linux Docker on Apple Silicon (vz) — Debian in Lima, rootless Engine, ducker CLI
 site_author: Nasr Aldin
 site_url: https://nasraldin.github.io/docker-lab/
 

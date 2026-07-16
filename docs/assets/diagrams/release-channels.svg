@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="220" viewBox="0 0 560 220" role="img" aria-label="Release distribution channels">
+  <defs>
+    <style>
+      .title { font: 700 15px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
+      .label { font: 600 13px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
+      .label-w { font: 600 13px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #FFFFFF; }
+      .small { font: 500 11px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #5A6A7A; }
+      .small-w { font: 500 11px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: rgba(255,255,255,0.9); }
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#00897B"/>
+    </marker>
+  </defs>
+  <rect width="560" height="220" rx="12" fill="#FAFBFC"/>
+  <text class="title" x="24" y="28">How a release ships</text>
+  <rect x="200" y="40" width="160" height="40" rx="8" fill="#00695C"/>
+  <text class="label-w" x="280" y="65" text-anchor="middle">GitHub Release</text>
+  <line x1="280" y1="80" x2="110" y2="140" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="280" y1="80" x2="280" y2="140" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="280" y1="80" x2="450" y2="140" stroke="#00897B" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="40" y="140" width="140" height="48" rx="8" fill="#00897B"/>
+  <text class="label-w" x="110" y="160" text-anchor="middle">install.sh</text>
+  <text class="small-w" x="110" y="176" text-anchor="middle">curl | bash</text>
+  <rect x="210" y="140" width="140" height="48" rx="8" fill="#00897B"/>
+  <text class="label-w" x="280" y="160" text-anchor="middle">Homebrew</text>
+  <text class="small-w" x="280" y="176" text-anchor="middle">ducker-lab</text>
+  <rect x="380" y="140" width="140" height="48" rx="8" fill="#00897B"/>
+  <text class="label-w" x="450" y="160" text-anchor="middle">Docs site</text>
+  <text class="small-w" x="450" y="176" text-anchor="middle">GitHub Pages</text>
+</svg>
