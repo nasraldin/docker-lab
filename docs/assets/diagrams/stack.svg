@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="568" height="480" viewBox="0 0 568 480" role="img" aria-label="Docker Lab stack diagram">
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="560" viewBox="0 0 640 560" role="img" aria-label="Docker Lab stack diagram">
   <defs>
     <style>
       .title { font: 700 15px 'IBM Plex Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif; fill: #1A2332; }
@@ -11,24 +11,37 @@
     <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
       <path d="M0,0 L6,3 L0,6 Z" fill="#00897B"/>
     </marker>
+      <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L7,3.5 L0,7 Z" fill="#FF8F00"/>
+    </marker>
   </defs>
-  <rect width="568" height="480" rx="12" fill="#FAFBFC"/>
-  <text class="title" x="24" y="24">How the stack fits together</text>
-  <rect x="24" y="40" width="520" height="420" rx="12" fill="#00695C"/>
-  <text class="label-w" x="40" y="66">macOS (Apple Silicon)</text>
-  <text class="small-w" x="40" y="84">host</text>
-  <rect x="44" y="100" width="480" height="72" rx="10" fill="#00897B"/>
-  <text class="label-w" x="60" y="128">Homebrew</text>
-  <text class="small-w" x="60" y="148">limactl · docker CLI · compose · buildx</text>
-  <rect x="64" y="192" width="440" height="44" rx="10" fill="#FF8F00"/>
-  <text class="label-w" x="284" y="219" text-anchor="middle">DOCKER_HOST → ~/.lima/docker/sock/docker.sock</text>
-  <rect x="64" y="256" width="440" height="184" rx="10" fill="#00897B"/>
-  <text class="label-w" x="80" y="280">Lima VM · vz + virtiofs + Rosetta</text>
-  <rect x="84" y="296" width="400" height="36" rx="6" fill="#00695C"/>
-  <text class="label-w" x="284" y="319" text-anchor="middle">Debian 13 (aarch64)</text>
-  <rect x="104" y="344" width="360" height="32" rx="6" fill="#00796B"/>
-  <text class="label-w" x="284" y="365" text-anchor="middle">Docker Engine (rootless)</text>
-  <rect x="124" y="388" width="320" height="28" rx="6" fill="#00695C"/>
-  <text class="label-w" x="284" y="407" text-anchor="middle">containerd + runc → containers</text>
-  <text class="small-w" x="40" y="444">Validated against Lima 2.x and Docker 29.x</text>
+  <rect width="640" height="560" rx="12" fill="#FAFBFC"/>
+  <text class="title" x="24" y="28">How the stack fits together</text>
+  <rect x="24" y="44" width="592" height="488" rx="14" fill="#00695C"/>
+  <text class="label-w" x="44" y="72">macOS (Apple Silicon)</text>
+  <text class="small-w" x="44" y="90">host</text>
+  <rect x="44" y="108" width="552" height="100" rx="10" fill="#00897B"/>
+  <text class="label-w" x="60" y="134">Homebrew</text>
+  <rect x="60" y="148" width="100" height="40" rx="8" fill="#00695C"/>
+  <text class="label-w" x="110" y="173" text-anchor="middle">limactl</text>
+  <rect x="176" y="148" width="120" height="40" rx="8" fill="#00695C"/>
+  <text class="label-w" x="236" y="173" text-anchor="middle">docker CLI</text>
+  <rect x="312" y="148" width="110" height="40" rx="8" fill="#00695C"/>
+  <text class="label-w" x="367" y="173" text-anchor="middle">compose</text>
+  <rect x="438" y="148" width="110" height="40" rx="8" fill="#00695C"/>
+  <text class="label-w" x="493" y="173" text-anchor="middle">buildx</text>
+  <line x1="236" y1="188" x2="236" y2="248" stroke="#FF8F00" stroke-width="3" marker-end="url(#arrow-amber)"/>
+  <rect x="256" y="200" width="320" height="36" rx="8" fill="#FF8F00"/>
+  <text class="small-w" x="416" y="216" text-anchor="middle">DOCKER_HOST</text>
+  <text class="small-w" x="416" y="230" text-anchor="middle">unix://~/.lima/docker/sock/docker.sock</text>
+  <rect x="44" y="256" width="552" height="248" rx="12" fill="#00897B"/>
+  <text class="label-w" x="60" y="282">Lima VM</text>
+  <text class="small-w" x="140" y="282">vz · virtiofs · Rosetta</text>
+  <rect x="60" y="300" width="520" height="184" rx="10" fill="#00695C"/>
+  <text class="label-w" x="76" y="326">Debian 13 (aarch64)</text>
+  <rect x="76" y="344" width="488" height="120" rx="10" fill="#00796B"/>
+  <text class="label-w" x="92" y="370">Docker Engine (rootless)</text>
+  <rect x="92" y="388" width="456" height="56" rx="8" fill="#004D40"/>
+  <text class="label-w" x="320" y="414" text-anchor="middle">containerd + runc → containers</text>
+  <text class="small-w" x="44" y="520">Validated against Lima 2.x and Docker 29.x</text>
 </svg>

@@ -90,32 +90,47 @@ def write_install_flow() -> None:
 
 
 def write_stack() -> None:
-    body = [
-        '  <text class="title" x="24" y="24">How the stack fits together</text>',
-        # macOS host
-        f'  <rect x="24" y="40" width="520" height="420" rx="12" fill="{TEAL_DARK}"/>',
-        '  <text class="label-w" x="40" y="66">macOS (Apple Silicon)</text>',
-        '  <text class="small-w" x="40" y="84">host</text>',
-        # Homebrew
-        f'  <rect x="44" y="100" width="480" height="72" rx="10" fill="{TEAL}"/>',
-        '  <text class="label-w" x="60" y="128">Homebrew</text>',
-        '  <text class="small-w" x="60" y="148">limactl · docker CLI · compose · buildx</text>',
-        # DOCKER_HOST bridge
-        f'  <rect x="64" y="192" width="440" height="44" rx="10" fill="{AMBER_DARK}"/>',
-        '  <text class="label-w" x="284" y="219" text-anchor="middle">DOCKER_HOST → ~/.lima/docker/sock/docker.sock</text>',
-        # Lima VM container
-        f'  <rect x="64" y="256" width="440" height="184" rx="10" fill="{TEAL}"/>',
-        '  <text class="label-w" x="80" y="280">Lima VM · vz + virtiofs + Rosetta</text>',
-        # nested guest layers
-        f'  <rect x="84" y="296" width="400" height="36" rx="6" fill="{TEAL_DARK}"/>',
-        '  <text class="label-w" x="284" y="319" text-anchor="middle">Debian 13 (aarch64)</text>',
-        f'  <rect x="104" y="344" width="360" height="32" rx="6" fill="#00796B"/>',
-        '  <text class="label-w" x="284" y="365" text-anchor="middle">Docker Engine (rootless)</text>',
-        f'  <rect x="124" y="388" width="320" height="28" rx="6" fill="#00695C"/>',
-        '  <text class="label-w" x="284" y="407" text-anchor="middle">containerd + runc → containers</text>',
-        '  <text class="small-w" x="40" y="444">Validated against Lima 2.x and Docker 29.x</text>',
+    """Tree-style stack: host tools → DOCKER_HOST arrow → nested Lima guest."""
+    w, h = 640, 560
+    body: list[str] = [
+        '  <text class="title" x="24" y="28">How the stack fits together</text>',
+        f'  <rect x="24" y="44" width="592" height="488" rx="14" fill="{TEAL_DARK}"/>',
+        '  <text class="label-w" x="44" y="72">macOS (Apple Silicon)</text>',
+        '  <text class="small-w" x="44" y="90">host</text>',
+        f'  <rect x="44" y="108" width="552" height="100" rx="10" fill="{TEAL}"/>',
+        '  <text class="label-w" x="60" y="134">Homebrew</text>',
+        f'  <rect x="60" y="148" width="100" height="40" rx="8" fill="{TEAL_DARK}"/>',
+        '  <text class="label-w" x="110" y="173" text-anchor="middle">limactl</text>',
+        f'  <rect x="176" y="148" width="120" height="40" rx="8" fill="{TEAL_DARK}"/>',
+        '  <text class="label-w" x="236" y="173" text-anchor="middle">docker CLI</text>',
+        f'  <rect x="312" y="148" width="110" height="40" rx="8" fill="{TEAL_DARK}"/>',
+        '  <text class="label-w" x="367" y="173" text-anchor="middle">compose</text>',
+        f'  <rect x="438" y="148" width="110" height="40" rx="8" fill="{TEAL_DARK}"/>',
+        '  <text class="label-w" x="493" y="173" text-anchor="middle">buildx</text>',
+        f'  <line x1="236" y1="188" x2="236" y2="248" stroke="{AMBER_DARK}" stroke-width="3" marker-end="url(#arrow-amber)"/>',
+        f'  <rect x="256" y="200" width="320" height="36" rx="8" fill="{AMBER_DARK}"/>',
+        '  <text class="small-w" x="416" y="216" text-anchor="middle">DOCKER_HOST</text>',
+        '  <text class="small-w" x="416" y="230" text-anchor="middle">unix://~/.lima/docker/sock/docker.sock</text>',
+        f'  <rect x="44" y="256" width="552" height="248" rx="12" fill="{TEAL}"/>',
+        '  <text class="label-w" x="60" y="282">Lima VM</text>',
+        '  <text class="small-w" x="140" y="282">vz · virtiofs · Rosetta</text>',
+        f'  <rect x="60" y="300" width="520" height="184" rx="10" fill="{TEAL_DARK}"/>',
+        '  <text class="label-w" x="76" y="326">Debian 13 (aarch64)</text>',
+        f'  <rect x="76" y="344" width="488" height="120" rx="10" fill="#00796B"/>',
+        '  <text class="label-w" x="92" y="370">Docker Engine (rootless)</text>',
+        f'  <rect x="92" y="388" width="456" height="56" rx="8" fill="#004D40"/>',
+        '  <text class="label-w" x="320" y="414" text-anchor="middle">containerd + runc → containers</text>',
+        '  <text class="small-w" x="44" y="520">Validated against Lima 2.x and Docker 29.x</text>',
     ]
-    (OUT / "stack.svg").write_text(svg_wrap(568, 480, "\n".join(body), "Docker Lab stack diagram"))
+    svg = svg_wrap(w, h, "\n".join(body), "Docker Lab stack diagram")
+    marker = (
+        '    <marker id="arrow-amber" markerWidth="10" markerHeight="10" '
+        f'refX="7" refY="3.5" orient="auto">\n'
+        f'      <path d="M0,0 L7,3.5 L0,7 Z" fill="{AMBER_DARK}"/>\n'
+        '    </marker>\n  </defs>'
+    )
+    svg = svg.replace("</defs>", marker, 1)
+    (OUT / "stack.svg").write_text(svg)
 
 
 def write_install_steps() -> None:

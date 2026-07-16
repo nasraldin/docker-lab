@@ -12,7 +12,22 @@ What we care about:
 
 ## Picture
 
-![Stack: macOS → Homebrew → DOCKER_HOST → Lima/Debian → rootless Docker](assets/diagrams/stack.png)
+![Stack diagram: macOS host with Homebrew tools; docker CLI connects via DOCKER_HOST into Lima VM → Debian 13 → rootless Docker → containerd](assets/diagrams/stack.png)
+
+Same tree as text (for copy/paste):
+
+```text
+macOS (Apple Silicon)
+  └── Homebrew
+        ├── limactl
+        ├── docker (CLI)  ──DOCKER_HOST──▶  Lima socket
+        ├── docker-compose
+        └── docker-buildx
+  └── Lima VM (vz + virtiofs + Rosetta)
+        └── Debian 13 (aarch64)
+              └── Docker Engine (rootless)
+                    └── containerd + runc → containers
+```
 
 We’ve been validating against Lima `2.x` and Docker `29.x`.
 
