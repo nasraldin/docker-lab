@@ -16,9 +16,7 @@ Wire plugins in `~/.docker/config.json`:
 
 ```json
 {
-  "cliPluginsExtraDirs": [
-    "/opt/homebrew/lib/docker/cli-plugins"
-  ]
+  "cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]
 }
 ```
 

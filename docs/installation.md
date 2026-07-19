@@ -57,11 +57,11 @@ source ~/.zshrc
 
 Pick VM size **before** you create the instance (or delete and recreate after changing it):
 
-| Profile | CPUs | Memory | Disk | Good for |
-| --- | --- | --- | --- | --- |
-| `small` | 4 | 8 GiB | 60 GiB | Lighter machines |
-| `balanced` | 6 | 16 GiB | 120 GiB | Day-to-day work |
-| `power` | 8 | 24 GiB | 200 GiB | Heavier builds (default-ish) |
+| Profile    | CPUs | Memory | Disk    | Good for                     |
+| ---------- | ---- | ------ | ------- | ---------------------------- |
+| `small`    | 4    | 8 GiB  | 60 GiB  | Lighter machines             |
+| `balanced` | 6    | 16 GiB | 120 GiB | Day-to-day work              |
+| `power`    | 8    | 24 GiB | 200 GiB | Heavier builds (default-ish) |
 
 ```bash
 ducker profile list
@@ -75,10 +75,10 @@ Leave headroom for macOS. Starving the host makes everything feel broken.
 
 UIs are separate on purpose:
 
-| Provider | Port | Notes |
-| --- | --- | --- |
-| `dockhand` | 9090 | Default. Wizard creates the admin user |
-| `arcane` | 3552 | Login starts as `arcane` / `arcane-admin` |
+| Provider   | Port | Notes                                     |
+| ---------- | ---- | ----------------------------------------- |
+| `dockhand` | 9090 | Default. Wizard creates the admin user    |
+| `arcane`   | 3552 | Login starts as `arcane` / `arcane-admin` |
 
 ```bash
 ducker ui install                 # dockhand
@@ -125,12 +125,12 @@ ducker install
 
 ## Where the truth lives
 
-| Path | What it is |
-| --- | --- |
-| `Brewfile` | Host packages |
-| `lima-docker.yaml` | Lima template |
-| `config/daemon.json` | Guest rootless dockerd |
-| `config/profiles/` | small / balanced / power |
-| `apps/ui/<provider>/` | Optional UIs |
+| Path                  | What it is               |
+| --------------------- | ------------------------ |
+| `Brewfile`            | Host packages            |
+| `lima-docker.yaml`    | Lima template            |
+| `config/daemon.json`  | Guest rootless dockerd   |
+| `config/profiles/`    | small / balanced / power |
+| `apps/ui/<provider>/` | Optional UIs             |
 
 Next: [Architecture](architecture.md) · [Troubleshooting](troubleshooting.md)

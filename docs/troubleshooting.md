@@ -13,18 +13,18 @@ ducker verify
 
 ## Symptom → fix
 
-| Symptom | Fix |
-| --- | --- |
-| `field images must be set` | Use this repo’s `lima-docker.yaml` (it has `base:` / images) |
-| Instance `Stopped`, no disk | `ducker doctor --fix`, or `limactl stop -f docker && limactl start docker` |
-| `another hostagent may already be running` | `ducker doctor --fix`, or `limactl stop -f docker` then start |
-| `cliPluginsExtraDirs` in daemon.json → Docker won’t start | `ducker doctor --fix` rewrites a known-good guest `daemon.json` |
-| buildx `default` error on `/var/run/docker.sock` | `ducker doctor --fix` (sets `DOCKER_HOST` + clears context) |
-| Compose/buildx “unknown command” | `ducker doctor --fix` or `ducker deps` |
-| Docker unreachable but VM is Running | `ducker doctor --fix` (wait for socket + restart guest Docker) |
-| Harmless restart warning `127.0.0.1:5355 address already in use` | LLMNR collision — ignore unless you need that forward |
-| `manifest.v1+prettyjws is no longer supported` | Image too old — pick a maintained one |
-| No Lima instance at all | `ducker install` (doctor will not create one) |
+| Symptom                                                          | Fix                                                                        |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `field images must be set`                                       | Use this repo’s `lima-docker.yaml` (it has `base:` / images)               |
+| Instance `Stopped`, no disk                                      | `ducker doctor --fix`, or `limactl stop -f docker && limactl start docker` |
+| `another hostagent may already be running`                       | `ducker doctor --fix`, or `limactl stop -f docker` then start              |
+| `cliPluginsExtraDirs` in daemon.json → Docker won’t start        | `ducker doctor --fix` rewrites a known-good guest `daemon.json`            |
+| buildx `default` error on `/var/run/docker.sock`                 | `ducker doctor --fix` (sets `DOCKER_HOST` + clears context)                |
+| Compose/buildx “unknown command”                                 | `ducker doctor --fix` or `ducker deps`                                     |
+| Docker unreachable but VM is Running                             | `ducker doctor --fix` (wait for socket + restart guest Docker)             |
+| Harmless restart warning `127.0.0.1:5355 address already in use` | LLMNR collision — ignore unless you need that forward                      |
+| `manifest.v1+prettyjws is no longer supported`                   | Image too old — pick a maintained one                                      |
+| No Lima instance at all                                          | `ducker install` (doctor will not create one)                              |
 
 ## Logs
 

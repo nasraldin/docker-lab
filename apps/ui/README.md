@@ -14,9 +14,9 @@ make ui default dockhand    # set default
 make ui uninstall arcane
 ```
 
-| Provider   | Port | First login                                      |
-| ---------- | ---- | ------------------------------------------------ |
-| `dockhand` | 9090 | first-run wizard creates admin                   |
+| Provider   | Port | First login                                       |
+| ---------- | ---- | ------------------------------------------------- |
+| `dockhand` | 9090 | first-run wizard creates admin                    |
 | `arcane`   | 3552 | `arcane` / `arcane-admin` (change on first login) |
 
 Default selection is stored in `apps/ui/.default` (gitignored).

@@ -43,14 +43,14 @@ ducker daemon
 
 ## What those keys mean
 
-| Key | Keep? | Why |
-| --- | --- | --- |
-| `features.cdi` | Yes | Rosetta CDI device support |
-| `features.containerd-snapshotter` | Yes | Modern storage path (`overlayfs`) |
-| `log-opts` max-size/file | Yes if containers run a long time | Caps logs (~30 MB per container) |
-| `storage-driver: overlay2` | **No** | Fights the containerd snapshotter |
-| `features.buildkit: true` | **No** | Redundant on Docker 23+/29 |
-| `cliPluginsExtraDirs` | **Never in daemon.json** | Host CLI only — breaks guest dockerd |
+| Key                               | Keep?                             | Why                                  |
+| --------------------------------- | --------------------------------- | ------------------------------------ |
+| `features.cdi`                    | Yes                               | Rosetta CDI device support           |
+| `features.containerd-snapshotter` | Yes                               | Modern storage path (`overlayfs`)    |
+| `log-opts` max-size/file          | Yes if containers run a long time | Caps logs (~30 MB per container)     |
+| `storage-driver: overlay2`        | **No**                            | Fights the containerd snapshotter    |
+| `features.buildkit: true`         | **No**                            | Redundant on Docker 23+/29           |
+| `cliPluginsExtraDirs`             | **Never in daemon.json**          | Host CLI only — breaks guest dockerd |
 
 Bad keys stop Docker from starting (`directives don't match any configuration option`).
 

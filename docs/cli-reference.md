@@ -5,45 +5,45 @@ Every `ducker` command with a sample terminal session (what you type + typical o
 These examples assume a healthy Apple Silicon lab after `ducker install`. Versions, paths, and timings will differ on your machine.
 
 !!! tip "How to read sessions"
-    Lines starting with `$` are what you type. Everything below is example output.
-    Destructive commands are marked with a warning.
+Lines starting with `$` are what you type. Everything below is example output.
+Destructive commands are marked with a warning.
 
 ## Command map
 
-| Command | Purpose |
-| --- | --- |
-| [`help`](#ducker-help) | Show usage |
-| [`version`](#ducker-version) | Short version string |
-| [`about`](#ducker-about) | Project + runtime info card |
-| [`cli-install`](#ducker-cli-install) | Link `ducker` on your `PATH` |
-| [`cli-uninstall`](#ducker-cli-uninstall) | Remove global symlink |
-| [`install`](#ducker-install) | One-shot full lab setup |
-| [`deps`](#ducker-deps--config--lima--daemon) | Re-run Homebrew packages |
-| [`config`](#ducker-deps--config--lima--daemon) | Host CLI + `DOCKER_HOST` |
-| [`lima`](#ducker-deps--config--lima--daemon) | Create/start Lima VM |
-| [`daemon`](#ducker-deps--config--lima--daemon) | Apply guest `daemon.json` |
-| [`profile`](#ducker-profile) | VM size: small / balanced / power |
-| [`verify`](#ducker-verify) | Health checks |
-| [`doctor`](#ducker-doctor) | Status + verify (+ `--fix`) |
-| [`diagnose`](#ducker-diagnose) | Deep diagnostics dump |
-| [`test`](#ducker-test--self-test) | Project self-test |
-| [`self-test`](#ducker-test--self-test) | Alias for `test` |
-| [`test-run`](#ducker-test-run) | alpine + stress-ng smoke |
-| [`benchmark`](#ducker-benchmark) | Disk / pull / run timings |
-| [`start`](#ducker-start--stop--restart) | Start Lima VM |
-| [`stop`](#ducker-start--stop--restart) | Stop Lima VM |
-| [`restart`](#ducker-start--stop--restart) | Restart Lima VM |
-| [`status`](#ducker-status--list) | VM + Docker summary |
-| [`list`](#ducker-status--list) | Alias for `status` |
-| [`stats`](#ducker-stats) | Live Docker stats |
-| [`shell`](#ducker-shell) | Shell into Debian guest |
-| [`upgrade`](#ducker-upgrade) | Brew upgrade + re-apply config |
-| [`backup`](#ducker-backup) | Snapshot lab config |
-| [`restore`](#ducker-restore) | Restore a backup |
-| [`ui`](#ducker-ui) | Optional Docker UIs |
-| [`vm-uninstall`](#ducker-vm-uninstall) | Delete Lima VM only |
-| [`lab-uninstall`](#ducker-lab-uninstall) | VM + managed host config |
-| [`nuke`](#ducker-nuke) | Full wipe |
+| Command                                        | Purpose                           |
+| ---------------------------------------------- | --------------------------------- |
+| [`help`](#ducker-help)                         | Show usage                        |
+| [`version`](#ducker-version)                   | Short version string              |
+| [`about`](#ducker-about)                       | Project + runtime info card       |
+| [`cli-install`](#ducker-cli-install)           | Link `ducker` on your `PATH`      |
+| [`cli-uninstall`](#ducker-cli-uninstall)       | Remove global symlink             |
+| [`install`](#ducker-install)                   | One-shot full lab setup           |
+| [`deps`](#ducker-deps--config--lima--daemon)   | Re-run Homebrew packages          |
+| [`config`](#ducker-deps--config--lima--daemon) | Host CLI + `DOCKER_HOST`          |
+| [`lima`](#ducker-deps--config--lima--daemon)   | Create/start Lima VM              |
+| [`daemon`](#ducker-deps--config--lima--daemon) | Apply guest `daemon.json`         |
+| [`profile`](#ducker-profile)                   | VM size: small / balanced / power |
+| [`verify`](#ducker-verify)                     | Health checks                     |
+| [`doctor`](#ducker-doctor)                     | Status + verify (+ `--fix`)       |
+| [`diagnose`](#ducker-diagnose)                 | Deep diagnostics dump             |
+| [`test`](#ducker-test--self-test)              | Project self-test                 |
+| [`self-test`](#ducker-test--self-test)         | Alias for `test`                  |
+| [`test-run`](#ducker-test-run)                 | alpine + stress-ng smoke          |
+| [`benchmark`](#ducker-benchmark)               | Disk / pull / run timings         |
+| [`start`](#ducker-start--stop--restart)        | Start Lima VM                     |
+| [`stop`](#ducker-start--stop--restart)         | Stop Lima VM                      |
+| [`restart`](#ducker-start--stop--restart)      | Restart Lima VM                   |
+| [`status`](#ducker-status--list)               | VM + Docker summary               |
+| [`list`](#ducker-status--list)                 | Alias for `status`                |
+| [`stats`](#ducker-stats)                       | Live Docker stats                 |
+| [`shell`](#ducker-shell)                       | Shell into Debian guest           |
+| [`upgrade`](#ducker-upgrade)                   | Brew upgrade + re-apply config    |
+| [`backup`](#ducker-backup)                     | Snapshot lab config               |
+| [`restore`](#ducker-restore)                   | Restore a backup                  |
+| [`ui`](#ducker-ui)                             | Optional Docker UIs               |
+| [`vm-uninstall`](#ducker-vm-uninstall)         | Delete Lima VM only               |
+| [`lab-uninstall`](#ducker-lab-uninstall)       | VM + managed host config          |
+| [`nuke`](#ducker-nuke)                         | Full wipe                         |
 
 ---
 
@@ -139,8 +139,8 @@ $ ./ducker cli-install
 ```
 
 !!! note
-    Ensure `~/.local/bin` is on your `PATH`. If not, add:
-    `export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc`.
+Ensure `~/.local/bin` is on your `PATH`. If not, add:
+`export PATH="$HOME/.local/bin:$PATH"` to `~/.zshrc`.
 
 ---
 
@@ -187,12 +187,12 @@ First boot downloads the Debian image and expands the disk — expect several mi
 
 Re-run one piece of install after you change something.
 
-| Command | Re-runs |
-| --- | --- |
-| `ducker deps` | Homebrew `Brewfile` |
+| Command         | Re-runs                                        |
+| --------------- | ---------------------------------------------- |
+| `ducker deps`   | Homebrew `Brewfile`                            |
 | `ducker config` | Host CLI plugins + `DOCKER_HOST` in `~/.zshrc` |
-| `ducker lima` | Create/start VM from `lima-docker.yaml` |
-| `ducker daemon` | Guest rootless `daemon.json` + restart Docker |
+| `ducker lima`   | Create/start VM from `lima-docker.yaml`        |
+| `ducker daemon` | Guest rootless `daemon.json` + restart Docker  |
 
 ```console
 $ ducker daemon
@@ -213,11 +213,11 @@ $ ducker lima
 
 Lists or applies VM resource profiles (`cpus` / `memory` / `disk` in `lima-docker.yaml`).
 
-| Profile | CPUs | Memory | Disk |
-| --- | --- | --- | --- |
-| `small` | 4 | 8 GiB | 60 GiB |
-| `balanced` | 6 | 16 GiB | 120 GiB |
-| `power` | 8 | 24 GiB | 200 GiB |
+| Profile    | CPUs | Memory | Disk    |
+| ---------- | ---- | ------ | ------- |
+| `small`    | 4    | 8 GiB  | 60 GiB  |
+| `balanced` | 6    | 16 GiB | 120 GiB |
+| `power`    | 8    | 24 GiB | 200 GiB |
 
 Use a profile before first create, or before recreating the VM on a smaller Mac.
 
@@ -342,17 +342,17 @@ WARN: Open a new terminal (or: source ~/.zshrc) so DOCKER_HOST is loaded
 
 **`--fix` covers**
 
-| Area | Repair |
-| --- | --- |
-| Host tools | Install Brewfile packages if `limactl` / `docker` / compose / buildx missing |
-| CLI plugins | Merge `cliPluginsExtraDirs` into `~/.docker/config.json` |
-| Shell env | Re-install managed `DOCKER_HOST` block in `~/.zshrc` |
-| Context | Unset `DOCKER_CONTEXT`, prefer `default`, drop leftover `lima-*` contexts |
-| Lima | Force stop + start when instance exists but is not Running (stale hostagent) |
-| Socket | Wait up to ~90s for the Lima Docker socket |
+| Area         | Repair                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| Host tools   | Install Brewfile packages if `limactl` / `docker` / compose / buildx missing                 |
+| CLI plugins  | Merge `cliPluginsExtraDirs` into `~/.docker/config.json`                                     |
+| Shell env    | Re-install managed `DOCKER_HOST` block in `~/.zshrc`                                         |
+| Context      | Unset `DOCKER_CONTEXT`, prefer `default`, drop leftover `lima-*` contexts                    |
+| Lima         | Force stop + start when instance exists but is not Running (stale hostagent)                 |
+| Socket       | Wait up to ~90s for the Lima Docker socket                                                   |
 | Guest daemon | Re-apply known-good `daemon.json` (removes bad keys like `cliPluginsExtraDirs` / `overlay2`) |
-| Guest Docker | Restart user Docker if `docker info` still fails |
-| Buildx | Refresh / re-check `default` builder once the engine is up |
+| Guest Docker | Restart user Docker if `docker info` still fails                                             |
+| Buildx       | Refresh / re-check `default` builder once the engine is up                                   |
 
 Does **not** create a missing Lima instance — run `ducker install` (or `ducker lima`) for that.
 
@@ -587,15 +587,15 @@ $ ducker restore 20260716-203012 --vm
 
 Manage optional Docker UIs. Default provider when omitted: **dockhand**.
 
-| Subcommand | Purpose |
-| --- | --- |
-| `ui list` | Providers + status |
-| `ui install [provider]` | Install & start UI |
-| `ui up` / `down` / `start` / `stop` | Compose lifecycle |
-| `ui open [provider]` | Open in browser |
-| `ui status [provider]` | Container status |
-| `ui default <provider>` | Set default for bare commands |
-| `ui uninstall [provider]` | Remove UI only (not the VM) |
+| Subcommand                          | Purpose                       |
+| ----------------------------------- | ----------------------------- |
+| `ui list`                           | Providers + status            |
+| `ui install [provider]`             | Install & start UI            |
+| `ui up` / `down` / `start` / `stop` | Compose lifecycle             |
+| `ui open [provider]`                | Open in browser               |
+| `ui status [provider]`              | Container status              |
+| `ui default <provider>`             | Set default for bare commands |
+| `ui uninstall [provider]`           | Remove UI only (not the VM)   |
 
 ```console
 $ ducker ui list
@@ -638,7 +638,7 @@ $ ducker ui uninstall arcane
 ```
 
 !!! note
-    UI uninstall never deletes the Lima VM. Use `vm-uninstall` / `nuke` for that.
+UI uninstall never deletes the Lima VM. Use `vm-uninstall` / `nuke` for that.
 
 ---
 
@@ -678,7 +678,7 @@ Full wipe — VM, **entire** `~/.lima`, Lima caches, managed host config, Brewfi
 Does **not** delete this git repo.
 
 !!! danger "Destructive"
-    Prefer `CONFIRM=yes` in CI/scripts. Interactive terminals prompt for `yes`.
+Prefer `CONFIRM=yes` in CI/scripts. Interactive terminals prompt for `yes`.
 
 ```console
 $ CONFIRM=yes ducker nuke

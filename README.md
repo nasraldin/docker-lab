@@ -17,13 +17,13 @@ You need **macOS on Apple Silicon** and [Homebrew](https://brew.sh).
 
 ## Why bother?
 
-| | Docker Desktop | OrbStack | Docker Lab |
-| --- | --- | --- | --- |
-| Open source | No | No | Yes |
-| Debian guest | No | No | Yes |
-| Rootless | Yes | Yes | Yes |
-| Full control of `daemon.json` | Limited | Partial | Yes |
-| Everything in git (Brewfile, Lima, daemon) | No | No | Yes |
+|                                            | Docker Desktop | OrbStack | Docker Lab |
+| ------------------------------------------ | -------------- | -------- | ---------- |
+| Open source                                | No             | No       | Yes        |
+| Debian guest                               | No             | No       | Yes        |
+| Rootless                                   | Yes            | Yes      | Yes        |
+| Full control of `daemon.json`              | Limited        | Partial  | Yes        |
+| Everything in git (Brewfile, Lima, daemon) | No             | No       | Yes        |
 
 Stack under the hood: Lima + Debian 13 + rootless Docker on Apple’s native `vz` (plus virtiofs and Rosetta).
 
@@ -77,18 +77,18 @@ ducker ui open
 
 ## Handy commands
 
-| Command | Meaning |
-| --- | --- |
-| `ducker install` | Set up the whole lab (safe to re-run) |
-| `ducker verify` / `doctor` / `diagnose` | Health checks |
-| `ducker doctor --fix` | Try the usual fixes |
-| `ducker status` / `stats` | What’s running |
-| `ducker benchmark` | Rough speed check |
-| `ducker upgrade` | Update brew tools and re-apply config |
-| `ducker backup` / `restore` | Save / restore config (optional VM dump) |
-| `ducker profile <name>` | `small`, `balanced`, or `power` |
-| `ducker ui …` | Optional web UIs |
-| `ducker nuke` | Wipe everything (`CONFIRM=yes` skips the prompt) |
+| Command                                 | Meaning                                          |
+| --------------------------------------- | ------------------------------------------------ |
+| `ducker install`                        | Set up the whole lab (safe to re-run)            |
+| `ducker verify` / `doctor` / `diagnose` | Health checks                                    |
+| `ducker doctor --fix`                   | Try the usual fixes                              |
+| `ducker status` / `stats`               | What’s running                                   |
+| `ducker benchmark`                      | Rough speed check                                |
+| `ducker upgrade`                        | Update brew tools and re-apply config            |
+| `ducker backup` / `restore`             | Save / restore config (optional VM dump)         |
+| `ducker profile <name>`                 | `small`, `balanced`, or `power`                  |
+| `ducker ui …`                           | Optional web UIs                                 |
+| `ducker nuke`                           | Wipe everything (`CONFIRM=yes` skips the prompt) |
 
 ```bash
 ducker about
@@ -113,21 +113,21 @@ More detail: [Architecture](https://nasraldin.github.io/docker-lab/architecture/
 
 Site: [https://nasraldin.github.io/docker-lab/](https://nasraldin.github.io/docker-lab/)
 
-| Page | About |
-| --- | --- |
-| [Installation](https://nasraldin.github.io/docker-lab/installation/) | Install, profiles, first boot |
-| [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/) | Commands + example terminal output |
-| [Architecture](https://nasraldin.github.io/docker-lab/architecture/) | Stack and Lima gotchas |
-| [Docker daemon](https://nasraldin.github.io/docker-lab/docker-daemon/) | Rootless `daemon.json`, BuildKit |
-| [Performance](https://nasraldin.github.io/docker-lab/performance/) | Mounts, benchmarks |
-| [Troubleshooting](https://nasraldin.github.io/docker-lab/troubleshooting/) | Broken? Start here |
-| [FAQ](https://nasraldin.github.io/docker-lab/faq/) | Short answers |
-| [Advanced](https://nasraldin.github.io/docker-lab/advanced/) | Manual steps, backup, upgrade |
-| [Comparison](https://nasraldin.github.io/docker-lab/comparison/) | vs Desktop / OrbStack |
-| [Roadmap](https://nasraldin.github.io/docker-lab/roadmap/) | Where this is going |
-| [Homebrew](https://nasraldin.github.io/docker-lab/homebrew/) | Tap and releases |
-| [Docs site](https://nasraldin.github.io/docker-lab/docs-site/) | Preview docs locally |
-| [Releasing](https://nasraldin.github.io/docker-lab/releasing/) | Tags and shipping |
+| Page                                                                       | About                              |
+| -------------------------------------------------------------------------- | ---------------------------------- |
+| [Installation](https://nasraldin.github.io/docker-lab/installation/)       | Install, profiles, first boot      |
+| [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/)     | Commands + example terminal output |
+| [Architecture](https://nasraldin.github.io/docker-lab/architecture/)       | Stack and Lima gotchas             |
+| [Docker daemon](https://nasraldin.github.io/docker-lab/docker-daemon/)     | Rootless `daemon.json`, BuildKit   |
+| [Performance](https://nasraldin.github.io/docker-lab/performance/)         | Mounts, benchmarks                 |
+| [Troubleshooting](https://nasraldin.github.io/docker-lab/troubleshooting/) | Broken? Start here                 |
+| [FAQ](https://nasraldin.github.io/docker-lab/faq/)                         | Short answers                      |
+| [Advanced](https://nasraldin.github.io/docker-lab/advanced/)               | Manual steps, backup, upgrade      |
+| [Comparison](https://nasraldin.github.io/docker-lab/comparison/)           | vs Desktop / OrbStack              |
+| [Roadmap](https://nasraldin.github.io/docker-lab/roadmap/)                 | Where this is going                |
+| [Homebrew](https://nasraldin.github.io/docker-lab/homebrew/)               | Tap and releases                   |
+| [Docs site](https://nasraldin.github.io/docker-lab/docs-site/)             | Preview docs locally               |
+| [Releasing](https://nasraldin.github.io/docker-lab/releasing/)             | Tags and shipping                  |
 
 Markdown lives in [`docs/`](docs/). To preview:
 

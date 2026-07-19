@@ -41,27 +41,27 @@ ducker doctor
 
 ## Why this instead of Desktop?
 
-| | Docker Desktop | OrbStack | Docker Lab |
-| --- | --- | --- | --- |
-| Open source | No | No | Yes |
-| Debian guest | No | No | Yes |
-| Rootless | Yes | Yes | Yes |
-| You own `daemon.json` | Limited | Partial | Yes |
-| Config lives in the repo | No | No | Yes |
+|                          | Docker Desktop | OrbStack | Docker Lab |
+| ------------------------ | -------------- | -------- | ---------- |
+| Open source              | No             | No       | Yes        |
+| Debian guest             | No             | No       | Yes        |
+| Rootless                 | Yes            | Yes      | Yes        |
+| You own `daemon.json`    | Limited        | Partial  | Yes        |
+| Config lives in the repo | No             | No       | Yes        |
 
 ## Commands you’ll use most
 
-| Command | Meaning |
-| --- | --- |
-| `ducker install` | Full setup (safe to re-run) |
-| `ducker verify` / `doctor` | Is it healthy? |
-| `ducker doctor --fix` | Apply the usual fixes |
-| `ducker status` / `stats` | What’s running |
-| `ducker upgrade` | Update tools + re-apply config |
-| `ducker backup` / `restore` | Snapshot config |
-| `ducker profile …` | `small` / `balanced` / `power` |
-| `ducker ui …` | Optional web UI (Dockhand by default) |
-| `ducker nuke` | Wipe the lab (`CONFIRM=yes` to skip prompt) |
+| Command                     | Meaning                                     |
+| --------------------------- | ------------------------------------------- |
+| `ducker install`            | Full setup (safe to re-run)                 |
+| `ducker verify` / `doctor`  | Is it healthy?                              |
+| `ducker doctor --fix`       | Apply the usual fixes                       |
+| `ducker status` / `stats`   | What’s running                              |
+| `ducker upgrade`            | Update tools + re-apply config              |
+| `ducker backup` / `restore` | Snapshot config                             |
+| `ducker profile …`          | `small` / `balanced` / `power`              |
+| `ducker ui …`               | Optional web UI (Dockhand by default)       |
+| `ducker nuke`               | Wipe the lab (`CONFIRM=yes` to skip prompt) |
 
 ## Where to go next
 

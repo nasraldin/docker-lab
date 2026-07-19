@@ -15,14 +15,14 @@ The tap repo is [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebr
 
 ## Status
 
-| Piece | Status |
-| --- | --- |
-| Formula in docker-lab | `Formula/ducker-lab.rb` |
-| Tap repo | [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebrew-tools) |
-| Local clone (handy) | `~/homelab/homebrew/homebrew-tools` |
-| Auto-update on GitHub Release | workflow (token must **push** to tap) |
-| Official Homebrew core | not used — custom tap only |
-| First release `v1.0.0` formula | published to the tap |
+| Piece                          | Status                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| Formula in docker-lab          | `Formula/ducker-lab.rb`                                                   |
+| Tap repo                       | [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebrew-tools) |
+| Local clone (handy)            | `~/homelab/homebrew/homebrew-tools`                                       |
+| Auto-update on GitHub Release  | workflow (token must **push** to tap)                                     |
+| Official Homebrew core         | not used — custom tap only                                                |
+| First release `v1.0.0` formula | published to the tap                                                      |
 
 `brew install ducker-lab` works after `brew tap nasraldin/tools` (and `brew update`).
 
@@ -150,11 +150,11 @@ SHA="$(curl -fsSL "${URL}" | shasum -a 256 | awk '{print $1}')"
 
 ## Troubleshooting
 
-| Symptom | Fix |
-| --- | --- |
-| `brew info ducker` shows a TUI / ducker.soane.io | That’s **homebrew-core** — unrelated. Use `brew info ducker-lab` |
-| `Error: Formula unavailable` | `brew tap nasraldin/tools` then `brew update` |
-| CI “Homebrew” fails: permission denied / 403 | Token lacks **Contents: Write** on `homebrew-tools`, or expired. Fix the secret, or run `./scripts/publish-homebrew.sh vX.Y.Z` locally with `gh` logged in |
-| `sha256 mismatch` | Tag was moved — don’t retag; cut a new version |
-| Old formula after release | `brew update && brew upgrade ducker-lab` |
-| Local tap folder moved but GitHub unchanged | Push from `~/homelab/homebrew/homebrew-tools` |
+| Symptom                                          | Fix                                                                                                                                                        |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `brew info ducker` shows a TUI / ducker.soane.io | That’s **homebrew-core** — unrelated. Use `brew info ducker-lab`                                                                                           |
+| `Error: Formula unavailable`                     | `brew tap nasraldin/tools` then `brew update`                                                                                                              |
+| CI “Homebrew” fails: permission denied / 403     | Token lacks **Contents: Write** on `homebrew-tools`, or expired. Fix the secret, or run `./scripts/publish-homebrew.sh vX.Y.Z` locally with `gh` logged in |
+| `sha256 mismatch`                                | Tag was moved — don’t retag; cut a new version                                                                                                             |
+| Old formula after release                        | `brew update && brew upgrade ducker-lab`                                                                                                                   |
+| Local tap folder moved but GitHub unchanged      | Push from `~/homelab/homebrew/homebrew-tools`                                                                                                              |

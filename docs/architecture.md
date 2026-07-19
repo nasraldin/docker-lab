@@ -33,15 +33,15 @@ We’ve been validating against Lima `2.x` and Docker `29.x`.
 
 ## Details that actually bite people
 
-| Topic | What you get |
-| --- | --- |
-| Guest arch | `aarch64` (same chips as macOS `arm64`) |
-| Image platform | `linux/arm64` |
-| VM type | `vz` — Apple’s native Virtualization.framework (stay on this for Apple Silicon) |
-| Mounts | VirtioFS — don’t put hot dirs like `node_modules` only on a Mac bind mount |
-| Docker | Rootless |
-| Storage | `overlayfs` via containerd snapshotter (not the old `overlay2` daemon flag) |
-| BuildKit | In the daemon; host still needs the `docker-buildx` plugin |
+| Topic          | What you get                                                                    |
+| -------------- | ------------------------------------------------------------------------------- |
+| Guest arch     | `aarch64` (same chips as macOS `arm64`)                                         |
+| Image platform | `linux/arm64`                                                                   |
+| VM type        | `vz` — Apple’s native Virtualization.framework (stay on this for Apple Silicon) |
+| Mounts         | VirtioFS — don’t put hot dirs like `node_modules` only on a Mac bind mount      |
+| Docker         | Rootless                                                                        |
+| Storage        | `overlayfs` via containerd snapshotter (not the old `overlay2` daemon flag)     |
+| BuildKit       | In the daemon; host still needs the `docker-buildx` plugin                      |
 
 ## Lima 2.x gotchas
 
@@ -55,13 +55,13 @@ If you want Debian 13, don’t start from `template://docker` — that path is U
 
 Defaults line up with the `power` profile (think M1 Max / 64 GB class):
 
-| Resource | Default | Why |
-| --- | --- | --- |
-| CPUs | 8 | Builds without freezing the Mac |
-| Memory | 24 GiB | Room for DBs and apps; leave some for macOS |
-| Disk | 200 GiB | Images and build cache add up |
-| `vmType` | `vz` | Native Apple virtualization — lighter than QEMU-style stacks |
-| Rosetta | on | When you need `linux/amd64` |
+| Resource | Default | Why                                                          |
+| -------- | ------- | ------------------------------------------------------------ |
+| CPUs     | 8       | Builds without freezing the Mac                              |
+| Memory   | 24 GiB  | Room for DBs and apps; leave some for macOS                  |
+| Disk     | 200 GiB | Images and build cache add up                                |
+| `vmType` | `vz`    | Native Apple virtualization — lighter than QEMU-style stacks |
+| Rosetta  | on      | When you need `linux/amd64`                                  |
 
 Smaller machine? `ducker profile small` or `balanced` — see [installation](installation.md#profiles).
 
@@ -71,12 +71,12 @@ Smaller machine? `ducker profile small` or `balanced` — see [installation](ins
 
 ## Files you’ll touch
 
-| Path | Role |
-| --- | --- |
-| `lima-docker.yaml` | Template you edit |
-| `~/.lima/docker/` | Live instance — don’t treat it as the template |
-| `~/.docker/config.json` | Host CLI plugins |
-| `~/.zshrc` | Managed `DOCKER_HOST` block |
-| Guest `~/.config/docker/daemon.json` | Rootless dockerd |
+| Path                                 | Role                                           |
+| ------------------------------------ | ---------------------------------------------- |
+| `lima-docker.yaml`                   | Template you edit                              |
+| `~/.lima/docker/`                    | Live instance — don’t treat it as the template |
+| `~/.docker/config.json`              | Host CLI plugins                               |
+| `~/.zshrc`                           | Managed `DOCKER_HOST` block                    |
+| Guest `~/.config/docker/daemon.json` | Rootless dockerd                               |
 
 Next: [Docker daemon](docker-daemon.md) · [Performance](performance.md)

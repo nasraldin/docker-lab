@@ -2,16 +2,16 @@
 
 How Docker Lab stacks up against the usual Mac Docker options:
 
-| | Docker Desktop | OrbStack | Docker Lab |
-| --- | --- | --- | --- |
-| Open source | No | No | Yes |
-| Debian guest | No | No | Yes |
-| Rootless Docker | Yes | Yes | Yes |
-| Full control of `daemon.json` | Limited | Partial | Yes |
-| Config in the repo (Brewfile, Lima, daemon) | No | No | Yes |
-| CLI for install / verify / doctor | N/A | Partial | `ducker` |
-| Built-in UI | Yes | Yes | Optional (Dockhand / Arcane) |
-| Cost | Paid for teams | Paid for Pro | MIT |
+|                                             | Docker Desktop | OrbStack     | Docker Lab                   |
+| ------------------------------------------- | -------------- | ------------ | ---------------------------- |
+| Open source                                 | No             | No           | Yes                          |
+| Debian guest                                | No             | No           | Yes                          |
+| Rootless Docker                             | Yes            | Yes          | Yes                          |
+| Full control of `daemon.json`               | Limited        | Partial      | Yes                          |
+| Config in the repo (Brewfile, Lima, daemon) | No             | No           | Yes                          |
+| CLI for install / verify / doctor           | N/A            | Partial      | `ducker`                     |
+| Built-in UI                                 | Yes            | Yes          | Optional (Dockhand / Arcane) |
+| Cost                                        | Paid for teams | Paid for Pro | MIT                          |
 
 ## Pick Docker Lab if…
 
