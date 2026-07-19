@@ -19,7 +19,7 @@ The tap repo is [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebr
 | --- | --- |
 | Formula in docker-lab | `Formula/ducker-lab.rb` |
 | Tap repo | [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebrew-tools) |
-| Local clone (handy) | `~/homelab/taps/homebrew-tools` |
+| Local clone (handy) | `~/homelab/homebrew/homebrew-tools` |
 | Auto-update on GitHub Release | workflow (token must **push** to tap) |
 | Official Homebrew core | not used — custom tap only |
 | First release `v1.0.0` formula | published to the tap |
@@ -33,8 +33,8 @@ The tap repo is [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebr
 Keep the tap next to docker-lab:
 
 ```bash
-mkdir -p ~/homelab/taps
-cd ~/homelab/taps
+mkdir -p ~/homelab/homebrew
+cd ~/homelab/homebrew
 git clone https://github.com/nasraldin/homebrew-tools.git
 ```
 
@@ -49,10 +49,10 @@ Copy the formula in when you’re editing by hand:
 
 ```bash
 cp ~/homelab/docker-lab/Formula/ducker-lab.rb \
-   ~/homelab/taps/homebrew-tools/Formula/ducker-lab.rb
-rm -f ~/homelab/taps/homebrew-tools/Formula/ducker.rb   # old name — drop it
+   ~/homelab/homebrew/homebrew-tools/Formula/ducker-lab.rb
+rm -f ~/homelab/homebrew/homebrew-tools/Formula/ducker.rb   # old name — drop it
 
-cd ~/homelab/taps/homebrew-tools
+cd ~/homelab/homebrew/homebrew-tools
 git add Formula/ducker-lab.rb
 git add -u Formula/ducker.rb
 git commit -m "ducker-lab: sync formula from docker-lab"
@@ -157,4 +157,4 @@ SHA="$(curl -fsSL "${URL}" | shasum -a 256 | awk '{print $1}')"
 | CI “Homebrew” fails: permission denied / 403 | Token lacks **Contents: Write** on `homebrew-tools`, or expired. Fix the secret, or run `./scripts/publish-homebrew.sh vX.Y.Z` locally with `gh` logged in |
 | `sha256 mismatch` | Tag was moved — don’t retag; cut a new version |
 | Old formula after release | `brew update && brew upgrade ducker-lab` |
-| Local tap folder moved but GitHub unchanged | Push from `~/homelab/taps/homebrew-tools` |
+| Local tap folder moved but GitHub unchanged | Push from `~/homelab/homebrew/homebrew-tools` |
