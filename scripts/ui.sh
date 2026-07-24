@@ -27,7 +27,7 @@ provider_known() {
 
 provider_installed() {
   # Compose project present or env file exists (configured)
-  [[ -f "$(env_file "$1")" ]] || docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qx "ui-$1"
+  [[ -f "$(env_file "$1")" ]] || docker ps -a --format '{{.Names}}' 2> /dev/null | grep -qx "ui-$1"
 }
 
 list_installed() {
@@ -42,7 +42,7 @@ list_installed() {
 read_default() {
   [[ -f "${DEFAULT_FILE}" ]] || return 1
   local d
-  d="$(tr -d '[:space:]' <"${DEFAULT_FILE}")"
+  d="$(tr -d '[:space:]' < "${DEFAULT_FILE}")"
   [[ -n "$d" ]] || return 1
   printf '%s' "$d"
 }
@@ -50,7 +50,7 @@ read_default() {
 write_default() {
   provider_known "$1" || die "Unknown provider: $1 (supported: ${KNOWN_PROVIDERS[*]})"
   mkdir -p "${UI_ROOT}"
-  printf '%s\n' "$1" >"${DEFAULT_FILE}"
+  printf '%s\n' "$1" > "${DEFAULT_FILE}"
   log "Default UI provider → $1"
 }
 
@@ -99,7 +99,7 @@ resolve_provider() {
     return 0
   fi
 
-  if def="$(read_default 2>/dev/null)"; then
+  if def="$(read_default 2> /dev/null)"; then
     printf '%s' "${def}"
     return 0
   fi
@@ -109,13 +109,13 @@ resolve_provider() {
   done < <(list_installed)
 
   if [[ "${#installed[@]}" -eq 1 ]]; then
-    write_default "${installed[0]}" >/dev/null
+    write_default "${installed[0]}" > /dev/null
     printf '%s' "${installed[0]}"
     return 0
   fi
 
   if [[ "${#installed[@]}" -gt 1 ]]; then
-    prompt_default "${installed[@]}" >/dev/null
+    prompt_default "${installed[@]}" > /dev/null
     read_default
     return 0
   fi
@@ -128,7 +128,7 @@ require_stack() {
   lima_running || die "Lima instance '${INSTANCE_NAME}' is not Running — run: make start"
   export DOCKER_HOST="${DOCKER_HOST:-unix://${HOME}/.lima/${INSTANCE_NAME}/sock/docker.sock}"
   unset DOCKER_CONTEXT || true
-  docker info >/dev/null 2>&1 || die "Docker daemon not reachable via DOCKER_HOST=${DOCKER_HOST}"
+  docker info > /dev/null 2>&1 || die "Docker daemon not reachable via DOCKER_HOST=${DOCKER_HOST}"
 }
 
 compose_for() {
@@ -157,7 +157,7 @@ ensure_env_arcane() {
   require_cmd openssl
   mkdir -p "$(provider_dir "$p")"
   sock="$(detect_guest_docker_sock)"
-  read -r puid pgid <<<"$(detect_guest_ids)"
+  read -r puid pgid <<< "$(detect_guest_ids)"
   port=3552
   app_url="http://localhost:${port}"
   enc=""
@@ -174,7 +174,7 @@ ensure_env_arcane() {
   fi
   [[ -n "${enc}" ]] || enc="$(openssl rand -hex 32)"
   [[ -n "${jwt}" ]] || jwt="$(openssl rand -hex 32)"
-  cat >"${ef}" <<EOF
+  cat > "${ef}" << EOF
 # Managed by docker-lab — do not commit
 UI_PORT=${port}
 APP_URL=${app_url}
@@ -204,7 +204,7 @@ ensure_env_dockhand() {
     port="${UI_PORT:-${port}}"
     app_url="${APP_URL:-http://localhost:${port}}"
   fi
-  cat >"${ef}" <<EOF
+  cat > "${ef}" << EOF
 # Managed by docker-lab — do not commit
 UI_PORT=${port}
 APP_URL=${app_url}
@@ -230,7 +230,7 @@ maybe_set_default_after_install() {
     [[ -n "${line}" ]] && installed+=("${line}")
   done < <(list_installed)
 
-  if ! def="$(read_default 2>/dev/null)"; then
+  if ! def="$(read_default 2> /dev/null)"; then
     # First UI install becomes default
     write_default "$p"
     return 0
@@ -250,7 +250,7 @@ maybe_set_default_after_install() {
 }
 
 cmd_help() {
-  cat <<'EOF'
+  cat << 'EOF'
 Docker UI manager (optional — not part of `make install`)
 
 Usage:
@@ -272,11 +272,11 @@ EOF
 
 cmd_list() {
   local p def status mark
-  def="$(read_default 2>/dev/null || true)"
+  def="$(read_default 2> /dev/null || true)"
   printf '%-12s %-10s %-8s %s\n' "PROVIDER" "STATUS" "DEFAULT" "URL"
   for p in "${KNOWN_PROVIDERS[@]}"; do
     if provider_installed "$p"; then
-      if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "ui-${p}"; then
+      if docker ps --format '{{.Names}}' 2> /dev/null | grep -qx "ui-${p}"; then
         status="running"
       else
         status="stopped"
@@ -302,7 +302,7 @@ cmd_install() {
   require_file "$(compose_file "$p")"
   ensure_env "$p"
   # migrate old single-container name
-  docker rm -f ui arcane >/dev/null 2>&1 || true
+  docker rm -f ui arcane > /dev/null 2>&1 || true
   log "Installing UI provider: ${p}"
   compose_for "$p" pull
   compose_for "$p" up -d --remove-orphans
@@ -370,7 +370,7 @@ cmd_open() {
     esac
   fi
   log "Opening ${p} → ${url}"
-  if command -v open >/dev/null 2>&1; then
+  if command -v open > /dev/null 2>&1; then
     open "${url}"
   else
     printf '%s\n' "${url}"
@@ -385,12 +385,12 @@ cmd_uninstall() {
     log "Removing UI provider: ${p}"
     compose_for "$p" down -v --remove-orphans
   else
-    docker rm -f "ui-${p}" >/dev/null 2>&1 || true
-    docker volume rm "ui-${p}_ui-data" >/dev/null 2>&1 || true
+    docker rm -f "ui-${p}" > /dev/null 2>&1 || true
+    docker volume rm "ui-${p}_ui-data" > /dev/null 2>&1 || true
   fi
   rm -f "$(env_file "$p")"
 
-  if def="$(read_default 2>/dev/null)" && [[ "${def}" == "$p" ]]; then
+  if def="$(read_default 2> /dev/null)" && [[ "${def}" == "$p" ]]; then
     rm -f "${DEFAULT_FILE}"
     local remaining=()
     while IFS= read -r line; do

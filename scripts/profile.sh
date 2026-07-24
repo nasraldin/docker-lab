@@ -7,7 +7,7 @@ PROFILES_DIR="${ROOT_DIR}/config/profiles"
 ACTIVE_FILE="${ROOT_DIR}/config/profiles/.active"
 
 usage() {
-  cat <<'EOF'
+  cat << 'EOF'
 Usage:
   ducker profile list
   ducker profile show
@@ -32,7 +32,7 @@ list_profiles() {
       "${PROFILE_DESCRIPTION:-}"
   done
   if [[ -f "${ACTIVE_FILE}" ]]; then
-    printf '\nActive: %s\n' "$(tr -d '[:space:]' <"${ACTIVE_FILE}")"
+    printf '\nActive: %s\n' "$(tr -d '[:space:]' < "${ACTIVE_FILE}")"
   else
     printf '\nActive: (none — lima-docker.yaml defaults / power-class)\n'
   fi
@@ -41,11 +41,11 @@ list_profiles() {
 show_active() {
   if [[ -f "${ACTIVE_FILE}" ]]; then
     local name
-    name="$(tr -d '[:space:]' <"${ACTIVE_FILE}")"
+    name="$(tr -d '[:space:]' < "${ACTIVE_FILE}")"
     require_file "${PROFILES_DIR}/${name}.env"
     # shellcheck source=/dev/null
     source "${PROFILES_DIR}/${name}.env"
-    cat <<EOF
+    cat << EOF
 Active profile: ${name}
   CPUs:    ${PROFILE_CPUS}
   Memory:  ${PROFILE_MEMORY}
@@ -75,10 +75,10 @@ apply_profile() {
     /^memory:/ && !done_m { print "memory: " mem; done_m=1; next }
     /^disk:/   && !done_d { print "disk: " disk; done_d=1; next }
     { print }
-  ' "${LIMA_TEMPLATE}" >"${LIMA_TEMPLATE}.tmp"
+  ' "${LIMA_TEMPLATE}" > "${LIMA_TEMPLATE}.tmp"
   mv "${LIMA_TEMPLATE}.tmp" "${LIMA_TEMPLATE}"
 
-  printf '%s\n' "${name}" >"${ACTIVE_FILE}"
+  printf '%s\n' "${name}" > "${ACTIVE_FILE}"
   log "Active profile set to '${name}'"
   if lima_exists; then
     warn "Instance '${INSTANCE_NAME}' already exists — CPU/memory/disk changes need recreate:"

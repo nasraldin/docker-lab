@@ -17,10 +17,10 @@ while read -r line; do
       pkg="${line#brew }"
       pkg="${pkg//\"/}"
       pkg="${pkg//\'/}"
-      brew upgrade "${pkg}" 2>/dev/null || true
+      brew upgrade "${pkg}" 2> /dev/null || true
       ;;
   esac
-done <"${ROOT_DIR}/Brewfile"
+done < "${ROOT_DIR}/Brewfile"
 
 log "Re-applying host Docker CLI + shell config"
 bash "${ROOT_DIR}/scripts/install-docker-cli-config.sh"

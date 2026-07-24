@@ -21,7 +21,7 @@ for a in "$@"; do
   case "${a}" in
     --fix | fix) FIX=1 ;;
     -h | --help | help)
-      cat <<'EOF'
+      cat << 'EOF'
 Usage: ducker doctor [--fix]
 
   ducker doctor         status + verify
@@ -65,8 +65,8 @@ fix_warn() {
 
 fix_host_tools() {
   log "Fix: host tools"
-  if command -v limactl >/dev/null 2>&1 && command -v docker >/dev/null 2>&1; then
-    if docker compose version >/dev/null 2>&1 && docker buildx version >/dev/null 2>&1; then
+  if command -v limactl > /dev/null 2>&1 && command -v docker > /dev/null 2>&1; then
+    if docker compose version > /dev/null 2>&1 && docker buildx version > /dev/null 2>&1; then
       fix_skip "limactl + docker + compose + buildx already present"
       return 0
     fi
@@ -102,27 +102,27 @@ fix_docker_context() {
   # Sticky contexts often point at Docker Desktop's /var/run/docker.sock
   unset DOCKER_CONTEXT || true
   export DOCKER_HOST
-  if command -v docker >/dev/null 2>&1; then
+  if command -v docker > /dev/null 2>&1; then
     # Prefer default context; ignore failures on older clients
-    docker context use default >/dev/null 2>&1 || true
+    docker context use default > /dev/null 2>&1 || true
     # Remove broken lima-* contexts that confuse buildx listings (optional)
     local ctx
     while IFS= read -r ctx; do
       [[ -n "${ctx}" ]] || continue
       case "${ctx}" in
         lima-"${INSTANCE_NAME}" | lima-docker)
-          docker context rm "${ctx}" >/dev/null 2>&1 || true
+          docker context rm "${ctx}" > /dev/null 2>&1 || true
           fix_ok "removed leftover context ${ctx}"
           ;;
       esac
-    done < <(docker context ls -q 2>/dev/null || true)
+    done < <(docker context ls -q 2> /dev/null || true)
   fi
   fix_ok "DOCKER_HOST=${DOCKER_HOST} (DOCKER_CONTEXT unset)"
 }
 
 fix_lima_instance() {
   log "Fix: Lima instance '${INSTANCE_NAME}'"
-  if ! command -v limactl >/dev/null 2>&1; then
+  if ! command -v limactl > /dev/null 2>&1; then
     fix_skip "limactl not installed"
     return 0
   fi
@@ -135,7 +135,7 @@ fix_lima_instance() {
     return 0
   fi
   fix_warn "instance not Running — force stop + start (clears stale hostagent)"
-  limactl stop -f "${INSTANCE_NAME}" 2>/dev/null || true
+  limactl stop -f "${INSTANCE_NAME}" 2> /dev/null || true
   if limactl start --tty=false "${INSTANCE_NAME}"; then
     fix_ok "started instance '${INSTANCE_NAME}'"
   else
@@ -151,7 +151,7 @@ fix_wait_docker_socket() {
   fi
   local n
   for n in $(seq 1 45); do
-    if [[ -S "${DOCKER_SOCK}" ]] && DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
+    if [[ -S "${DOCKER_SOCK}" ]] && DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info > /dev/null 2>&1; then
       fix_ok "Docker socket ready (${DOCKER_SOCK}) after ~$((n * 2))s"
       return 0
     fi
@@ -174,7 +174,7 @@ fix_guest_daemon() {
     fix_warn "daemon apply failed — attempting guest Docker restart only"
     limactl shell "${INSTANCE_NAME}" -- bash -lc \
       'systemctl --user restart docker || dockerd-rootless-setuptool.sh install || true' \
-      2>/dev/null || true
+      2> /dev/null || true
   fi
 }
 
@@ -184,7 +184,7 @@ fix_guest_docker_active() {
     fix_skip "VM not Running"
     return 0
   fi
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info > /dev/null 2>&1; then
     fix_skip "docker info already OK"
     return 0
   fi
@@ -194,9 +194,9 @@ fix_guest_docker_active() {
     systemctl --user start dbus 2>/dev/null || true
     systemctl --user restart docker
     systemctl --user --quiet is-active docker
-  ' 2>/dev/null || true
+  ' 2> /dev/null || true
   sleep 3
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info > /dev/null 2>&1; then
     fix_ok "guest Docker responding after restart"
   else
     fix_warn "still unreachable — journalctl --user -u docker inside guest"
@@ -205,21 +205,21 @@ fix_guest_docker_active() {
 
 fix_buildx_default() {
   log "Fix: buildx default builder"
-  if ! command -v docker >/dev/null 2>&1; then
+  if ! command -v docker > /dev/null 2>&1; then
     fix_skip "docker CLI missing"
     return 0
   fi
-  if ! DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info >/dev/null 2>&1; then
+  if ! DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker info > /dev/null 2>&1; then
     fix_skip "daemon unreachable — skip buildx"
     return 0
   fi
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx inspect default >/dev/null 2>&1; then
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx inspect default > /dev/null 2>&1; then
     fix_skip "buildx default already healthy"
     return 0
   fi
   # With DOCKER_HOST set, default builder should track the engine; nudge inspect/ls
-  DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx ls >/dev/null 2>&1 || true
-  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx inspect default >/dev/null 2>&1; then
+  DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx ls > /dev/null 2>&1 || true
+  if DOCKER_HOST="${DOCKER_HOST}" DOCKER_CONTEXT='' docker buildx inspect default > /dev/null 2>&1; then
     fix_ok "buildx default healthy after refresh"
   else
     fix_warn "buildx default still unhealthy — ensure DOCKER_HOST in new shells (source ~/.zshrc)"

@@ -11,7 +11,7 @@ remove_shell_block() {
   require_cmd python3
   [[ -f "${ZSHRC_FILE}" ]] || return 0
   log "Removing managed shell block from ${ZSHRC_FILE}"
-  python3 - "${ZSHRC_FILE}" "${MARKER_BEGIN}" "${MARKER_END}" <<'PY'
+  python3 - "${ZSHRC_FILE}" "${MARKER_BEGIN}" "${MARKER_END}" << 'PY'
 import pathlib, re, sys
 path = pathlib.Path(sys.argv[1])
 begin, end = sys.argv[2], sys.argv[3]
@@ -33,7 +33,7 @@ remove_cli_plugins_dir() {
   require_cmd python3
   [[ -f "${DOCKER_CONFIG_JSON}" ]] || return 0
   log "Removing Homebrew cliPluginsExtraDirs entry (leaving unrelated Docker config)"
-  python3 - "${DOCKER_CONFIG_JSON}" "${CLI_PLUGINS_DIR}" <<'PY'
+  python3 - "${DOCKER_CONFIG_JSON}" "${CLI_PLUGINS_DIR}" << 'PY'
 import json, sys
 from pathlib import Path
 path = Path(sys.argv[1])
@@ -51,7 +51,7 @@ PY
 }
 
 stop_instance() {
-  if command -v limactl >/dev/null 2>&1 && lima_exists; then
+  if command -v limactl > /dev/null 2>&1 && lima_exists; then
     log "Stopping instance '${INSTANCE_NAME}'"
     limactl stop -f "${INSTANCE_NAME}" || true
   else
@@ -61,14 +61,14 @@ stop_instance() {
 
 # Wipe containers/images/volumes inside the guest while Docker still responds.
 prune_guest_docker() {
-  command -v limactl >/dev/null 2>&1 || return 0
+  command -v limactl > /dev/null 2>&1 || return 0
   lima_running || return 0
-  command -v docker >/dev/null 2>&1 || return 0
+  command -v docker > /dev/null 2>&1 || return 0
 
   export DOCKER_HOST="unix://${HOME}/.lima/${INSTANCE_NAME}/sock/docker.sock"
   unset DOCKER_CONTEXT || true
 
-  if ! docker info >/dev/null 2>&1; then
+  if ! docker info > /dev/null 2>&1; then
     warn "Docker not reachable inside guest — skipping image prune (VM delete will still wipe disk)"
     return 0
   fi
@@ -76,18 +76,18 @@ prune_guest_docker() {
   log "Pruning all Docker containers, images, volumes, networks, and build cache"
   while read -r id; do
     [[ -n "${id}" ]] || continue
-    docker rm -f "${id}" >/dev/null 2>&1 || true
-  done < <(docker ps -aq 2>/dev/null || true)
+    docker rm -f "${id}" > /dev/null 2>&1 || true
+  done < <(docker ps -aq 2> /dev/null || true)
 
-  docker system prune -a --volumes -f >/dev/null 2>&1 || true
-  docker builder prune -a -f >/dev/null 2>&1 || true
+  docker system prune -a --volumes -f > /dev/null 2>&1 || true
+  docker builder prune -a -f > /dev/null 2>&1 || true
   log "Guest Docker data pruned"
 }
 
 delete_instance() {
   prune_guest_docker
   stop_instance
-  if command -v limactl >/dev/null 2>&1 && lima_exists; then
+  if command -v limactl > /dev/null 2>&1 && lima_exists; then
     log "Deleting instance '${INSTANCE_NAME}' (VM disk + Docker root wiped)"
     limactl delete -f "${INSTANCE_NAME}"
   else
@@ -104,12 +104,12 @@ delete_instance() {
 
 prune_lima_caches() {
   log "Pruning Lima download/image caches"
-  if command -v limactl >/dev/null 2>&1; then
-    limactl prune 2>/dev/null || true
+  if command -v limactl > /dev/null 2>&1; then
+    limactl prune 2> /dev/null || true
   fi
   rm -rf "${HOME}/Library/Caches/lima"
   # Rejected / temp yaml leftovers from failed starts
-  rm -f "${HOME}/lima.REJECTED.yaml" "${PWD}/lima.REJECTED.yaml" 2>/dev/null || true
+  rm -f "${HOME}/lima.REJECTED.yaml" "${PWD}/lima.REJECTED.yaml" 2> /dev/null || true
 }
 
 # Full wipe of ~/.lima (instances, _config, _networks, leftovers).
@@ -122,15 +122,15 @@ remove_lima_home() {
   fi
 
   # Stop/delete any remaining named instances before ripping out the tree
-  if command -v limactl >/dev/null 2>&1; then
+  if command -v limactl > /dev/null 2>&1; then
     local name
     while IFS= read -r name; do
       [[ -n "${name}" ]] || continue
       log "Stopping leftover Lima instance '${name}'"
-      limactl stop -f "${name}" 2>/dev/null || true
+      limactl stop -f "${name}" 2> /dev/null || true
       log "Deleting leftover Lima instance '${name}'"
-      limactl delete -f "${name}" 2>/dev/null || true
-    done < <(limactl list -q 2>/dev/null || true)
+      limactl delete -f "${name}" 2> /dev/null || true
+    done < <(limactl list -q 2> /dev/null || true)
   fi
 
   log "Removing ${lima_home}"
@@ -145,18 +145,18 @@ remove_lima_home() {
 remove_host_docker_state() {
   log "Cleaning host Docker CLI state tied to this lab"
   # Contexts that pointed at Lima
-  if command -v docker >/dev/null 2>&1; then
-    docker context rm lima-docker "lima-${INSTANCE_NAME}" 2>/dev/null || true
-    docker buildx rm lima-builder 2>/dev/null || true
+  if command -v docker > /dev/null 2>&1; then
+    docker context rm lima-docker "lima-${INSTANCE_NAME}" 2> /dev/null || true
+    docker buildx rm lima-builder 2> /dev/null || true
   fi
   # buildx activity for default/lima is harmless; remove lima-named instances if present
-  rm -rf "${HOME}/.docker/buildx/instances/lima-builder" 2>/dev/null || true
+  rm -rf "${HOME}/.docker/buildx/instances/lima-builder" 2> /dev/null || true
   # Copied template from make sync-home-template
   rm -f "${HOME}/lima-docker.yaml"
 }
 
 purge_brew() {
-  if ! command -v brew >/dev/null 2>&1; then
+  if ! command -v brew > /dev/null 2>&1; then
     warn "brew not found — skipping package uninstall"
     return 0
   fi
@@ -165,8 +165,8 @@ purge_brew() {
   local formulae
   formulae="$(awk '/^brew /{gsub(/"/,"",$2); print $2}' "${ROOT_DIR}/Brewfile")"
   # shellcheck disable=SC2086
-  brew uninstall --force ${formulae} 2>/dev/null || true
-  brew cleanup -s 2>/dev/null || true
+  brew uninstall --force ${formulae} 2> /dev/null || true
+  brew cleanup -s 2> /dev/null || true
 }
 
 is_affirmative() {
@@ -212,9 +212,9 @@ nuke_all() {
   remove_cli_plugins_dir
   # UI provider local state (compose templates kept)
   rm -f "${ROOT_DIR}/apps/ui/.default" \
-    "${ROOT_DIR}/apps/ui"/*/.env 2>/dev/null || true
+    "${ROOT_DIR}/apps/ui"/*/.env 2> /dev/null || true
   # Lab backups under XDG share (optional; nuke = full wipe of lab state)
-  rm -rf "${HOME}/.local/share/docker-lab" 2>/dev/null || true
+  rm -rf "${HOME}/.local/share/docker-lab" 2> /dev/null || true
   purge_brew
   log "Unset in this shell (new terminals won't load DOCKER_HOST after zshrc cleanup):"
   log "  unset DOCKER_HOST DOCKER_CONTEXT"

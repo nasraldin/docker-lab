@@ -7,7 +7,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DUCKER="${ROOT}/ducker"
 LOG="${ROOT}/.e2e-results.log"
-: >"${LOG}"
+: > "${LOG}"
 
 export ROOT_DIR="${ROOT}"
 export DOCKER_HOST="unix://${HOME}/.lima/docker/sock/docker.sock"

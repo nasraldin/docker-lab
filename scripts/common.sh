@@ -19,11 +19,11 @@ export MARKER_BEGIN MARKER_END
 _default_cli_plugins_dir() {
   local prefix=""
   if [[ -x /opt/homebrew/bin/brew ]]; then
-    prefix="$(/opt/homebrew/bin/brew --prefix 2>/dev/null || true)"
+    prefix="$(/opt/homebrew/bin/brew --prefix 2> /dev/null || true)"
   elif [[ -x /usr/local/bin/brew ]]; then
-    prefix="$(/usr/local/bin/brew --prefix 2>/dev/null || true)"
-  elif command -v brew >/dev/null 2>&1; then
-    prefix="$(brew --prefix 2>/dev/null || true)"
+    prefix="$(/usr/local/bin/brew --prefix 2> /dev/null || true)"
+  elif command -v brew > /dev/null 2>&1; then
+    prefix="$(brew --prefix 2> /dev/null || true)"
   fi
   if [[ -n "${prefix}" ]]; then
     printf '%s/lib/docker/cli-plugins' "${prefix}"
@@ -43,7 +43,7 @@ die() {
 require_cmd() {
   local cmd
   for cmd in "$@"; do
-    command -v "${cmd}" >/dev/null 2>&1 || die "Missing required command: ${cmd}"
+    command -v "${cmd}" > /dev/null 2>&1 || die "Missing required command: ${cmd}"
   done
 }
 
@@ -62,17 +62,17 @@ require_file() {
 }
 
 lima_status() {
-  limactl list -q 2>/dev/null | grep -qx "${INSTANCE_NAME}" || return 1
-  limactl list -f '{{.Name}} {{.Status}}' 2>/dev/null |
+  limactl list -q 2> /dev/null | grep -qx "${INSTANCE_NAME}" || return 1
+  limactl list -f '{{.Name}} {{.Status}}' 2> /dev/null |
     awk -v n="${INSTANCE_NAME}" '$1 == n { print $2; exit }'
 }
 
 lima_exists() {
-  limactl list -q 2>/dev/null | grep -qx "${INSTANCE_NAME}"
+  limactl list -q 2> /dev/null | grep -qx "${INSTANCE_NAME}"
 }
 
 lima_running() {
-  [[ "$(lima_status 2>/dev/null || true)" == "Running" ]]
+  [[ "$(lima_status 2> /dev/null || true)" == "Running" ]]
 }
 
 ensure_brew() {

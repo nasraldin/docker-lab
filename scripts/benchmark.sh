@@ -45,19 +45,19 @@ if ! run_timed "guest disk write (dd 256M)" \
 fi
 
 # 2) Image pull
-docker rmi alpine:latest >/dev/null 2>&1 || true
-if ! run_timed "docker pull alpine:latest" docker pull alpine:latest >/dev/null; then
+docker rmi alpine:latest > /dev/null 2>&1 || true
+if ! run_timed "docker pull alpine:latest" docker pull alpine:latest > /dev/null; then
   failures=$((failures + 1))
 fi
 
 # 3) Container start
-if ! run_timed "docker run hello-world" docker run --rm hello-world >/dev/null; then
+if ! run_timed "docker run hello-world" docker run --rm hello-world > /dev/null; then
   failures=$((failures + 1))
 fi
 
 # 4) Short CPU stress (optional — network/image may already be cached)
 if ! run_timed "stress-ng cpu 2 / 10s" \
-  docker run --rm ghcr.io/colinianking/stress-ng --cpu 2 --timeout 10s --metrics-brief >/dev/null; then
+  docker run --rm ghcr.io/colinianking/stress-ng --cpu 2 --timeout 10s --metrics-brief > /dev/null; then
   warn "stress-ng step failed (network or image) — other timings still useful"
   failures=$((failures + 1))
 fi

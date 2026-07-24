@@ -28,11 +28,11 @@ FORMULA_NAME="ducker-lab"
 VERSION="${TAG#v}"
 TARBALL_URL="https://github.com/nasraldin/docker-lab/archive/refs/tags/${TAG}.tar.gz"
 
-command -v gh >/dev/null 2>&1 || {
+command -v gh > /dev/null 2>&1 || {
   echo "ERROR: gh CLI required" >&2
   exit 1
 }
-command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1 || {
+command -v shasum > /dev/null 2>&1 || command -v sha256sum > /dev/null 2>&1 || {
   echo "ERROR: shasum or sha256sum required" >&2
   exit 1
 }
@@ -41,7 +41,7 @@ echo "==> Fetching ${TARBALL_URL}"
 TMP="$(mktemp)"
 curl -fsSL "${TARBALL_URL}" -o "${TMP}"
 
-if command -v shasum >/dev/null 2>&1; then
+if command -v shasum > /dev/null 2>&1; then
   SHA="$(shasum -a 256 "${TMP}" | awk '{print $1}')"
 else
   SHA="$(sha256sum "${TMP}" | awk '{print $1}')"
@@ -69,14 +69,14 @@ awk -v url="${TARBALL_URL}" -v sha="${SHA}" '
   /^  url "/ { print "  url \"" url "\""; next }
   /^  sha256 "/ { print "  sha256 \"" sha "\""; next }
   { print }
-' "${TEMPLATE}" >"${WORKDIR}/tap/Formula/${FORMULA_NAME}.rb"
+' "${TEMPLATE}" > "${WORKDIR}/tap/Formula/${FORMULA_NAME}.rb"
 
 # Remove legacy formula name if present (homebrew-core owns plain "ducker")
 rm -f "${WORKDIR}/tap/Formula/ducker.rb"
 
 # Ensure README exists
 if [[ ! -f "${WORKDIR}/tap/README.md" ]]; then
-  cat >"${WORKDIR}/tap/README.md" <<'EOF'
+  cat > "${WORKDIR}/tap/README.md" << 'EOF'
 # nasraldin/homebrew-tools
 
 Homebrew tap for Nasr Aldin tools.
@@ -101,7 +101,7 @@ if [[ -n "${GH_TOKEN:-}" ]]; then
 fi
 
 git add Formula/"${FORMULA_NAME}.rb" README.md
-git add -u Formula/ducker.rb 2>/dev/null || true
+git add -u Formula/ducker.rb 2> /dev/null || true
 if git diff --cached --quiet; then
   echo "==> No changes (formula already up to date for ${TAG})"
   exit 0

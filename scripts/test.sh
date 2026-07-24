@@ -103,13 +103,13 @@ if [[ -x "${ROOT_DIR}/ducker" ]]; then
 else
   fail "ducker missing or not executable"
 fi
-if bash -n "${ROOT_DIR}/ducker" 2>/dev/null; then
+if bash -n "${ROOT_DIR}/ducker" 2> /dev/null; then
   pass "bash -n ducker"
 else
   fail "bash -n ducker"
   bash -n "${ROOT_DIR}/ducker" || true
 fi
-if "${ROOT_DIR}/ducker" help >/dev/null 2>&1; then
+if "${ROOT_DIR}/ducker" help > /dev/null 2>&1; then
   pass "./ducker help"
 else
   fail "./ducker help"
@@ -117,7 +117,7 @@ fi
 
 section "Static: bash syntax (bash -n)"
 while IFS= read -r -d '' script; do
-  if bash -n "${script}" 2>/dev/null; then
+  if bash -n "${script}" 2> /dev/null; then
     pass "bash -n ${script#"${ROOT_DIR}/"}"
   else
     fail "bash -n ${script#"${ROOT_DIR}/"}"
@@ -141,31 +141,31 @@ assert_cmd "install-deps wires Docker CLI plugins before compose check" \
 assert_cmd "config.env has author + version metadata" \
   bash -c "grep -q 'DOCKER_LAB_AUTHOR' '${ROOT_DIR}/config.env' && grep -q 'DOCKER_LAB_VERSION' '${ROOT_DIR}/config.env'"
 
-if "${ROOT_DIR}/ducker" about >/dev/null 2>&1; then
+if "${ROOT_DIR}/ducker" about > /dev/null 2>&1; then
   pass "./ducker about"
 else
   fail "./ducker about"
 fi
 
-if bash -n "${ROOT_DIR}/install.sh" 2>/dev/null; then
+if bash -n "${ROOT_DIR}/install.sh" 2> /dev/null; then
   pass "bash -n install.sh"
 else
   fail "bash -n install.sh"
 fi
 
-if bash "${ROOT_DIR}/scripts/profile.sh" list >/dev/null 2>&1; then
+if bash "${ROOT_DIR}/scripts/profile.sh" list > /dev/null 2>&1; then
   pass "scripts/profile.sh list"
 else
   fail "scripts/profile.sh list"
 fi
 
-if bash "${ROOT_DIR}/scripts/backup.sh" list >/dev/null 2>&1; then
+if bash "${ROOT_DIR}/scripts/backup.sh" list > /dev/null 2>&1; then
   pass "scripts/backup.sh list"
 else
   fail "scripts/backup.sh list"
 fi
 
-if bash "${ROOT_DIR}/scripts/doctor.sh" --help >/dev/null 2>&1; then
+if bash "${ROOT_DIR}/scripts/doctor.sh" --help > /dev/null 2>&1; then
   pass "scripts/doctor.sh --help"
 else
   fail "scripts/doctor.sh --help"
@@ -192,13 +192,13 @@ assert_cmd "Makefile has ui firstword collision guard" \
 section "Make: help / dry-run / UI collision safety"
 cd "${ROOT_DIR}" || exit 1
 
-if make help >/dev/null 2>&1; then
+if make help > /dev/null 2>&1; then
   pass "make help"
 else
   fail "make help"
 fi
 
-if make -n install >/dev/null 2>&1; then
+if make -n install > /dev/null 2>&1; then
   pass "make -n install"
 else
   fail "make -n install"
@@ -214,7 +214,7 @@ else
 fi
 if printf '%s' "${dry_ui}" | grep -q 'uninstall.sh'; then
   # ui path may mention scripts dir; lab collision would pass " instance" as arg
-  if printf '%s' "${dry_ui}" | grep -E 'uninstall\.sh[[:space:]]+"?instance"?|[[:space:]]instance$' >/dev/null; then
+  if printf '%s' "${dry_ui}" | grep -E 'uninstall\.sh[[:space:]]+"?instance"?|[[:space:]]instance$' > /dev/null; then
     fail "make -n ui uninstall dockhand would also run lab vm-uninstall (collision)"
     printf '%s\n' "${dry_ui}" >&2
   else
@@ -241,7 +241,7 @@ else
 fi
 
 for action in help list; do
-  if make -n ui "${action}" >/dev/null 2>&1; then
+  if make -n ui "${action}" > /dev/null 2>&1; then
     pass "make -n ui ${action}"
   else
     fail "make -n ui ${action}"
@@ -249,15 +249,15 @@ for action in help list; do
 done
 
 # ui.sh help works without Docker/Lima
-if bash "${ROOT_DIR}/scripts/ui.sh" help >/dev/null 2>&1; then
+if bash "${ROOT_DIR}/scripts/ui.sh" help > /dev/null 2>&1; then
   pass "scripts/ui.sh help"
 else
   fail "scripts/ui.sh help"
 fi
 
 section "Lima template validate (if limactl present)"
-if command -v limactl >/dev/null 2>&1; then
-  if limactl template validate "${ROOT_DIR}/lima-docker.yaml" >/dev/null 2>&1; then
+if command -v limactl > /dev/null 2>&1; then
+  if limactl template validate "${ROOT_DIR}/lima-docker.yaml" > /dev/null 2>&1; then
     pass "limactl template validate lima-docker.yaml"
   else
     fail "limactl template validate lima-docker.yaml"
@@ -280,7 +280,7 @@ section "Live checks (LIVE=${LIVE})"
 if [[ "${LIVE}" != "1" ]]; then
   skip "set LIVE=1 to test against a Running Lima VM"
 else
-  if ! command -v limactl >/dev/null 2>&1; then
+  if ! command -v limactl > /dev/null 2>&1; then
     fail "LIVE=1 but limactl missing"
   elif ! lima_running; then
     fail "LIVE=1 but instance '${INSTANCE_NAME}' is not Running (make install / make start)"
@@ -296,19 +296,19 @@ else
       fail "scripts/verify.sh"
     fi
 
-    if make -C "${ROOT_DIR}" status >/dev/null 2>&1; then
+    if make -C "${ROOT_DIR}" status > /dev/null 2>&1; then
       pass "make status"
     else
       fail "make status"
     fi
 
-    if make -C "${ROOT_DIR}" ui list >/dev/null 2>&1; then
+    if make -C "${ROOT_DIR}" ui list > /dev/null 2>&1; then
       pass "make ui list"
     else
       fail "make ui list"
     fi
 
-    if docker run --rm hello-world >/dev/null 2>&1; then
+    if docker run --rm hello-world > /dev/null 2>&1; then
       pass "docker run hello-world"
     else
       fail "docker run hello-world"

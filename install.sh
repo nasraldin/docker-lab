@@ -23,8 +23,8 @@ die() {
 
 [[ "$(uname -s)" == "Darwin" ]] || die "Docker Lab targets macOS only"
 [[ "$(uname -m)" == "arm64" ]] || die "Apple Silicon (arm64) required; found $(uname -m)"
-command -v brew >/dev/null 2>&1 || die "Homebrew is required — install from https://brew.sh"
-command -v git >/dev/null 2>&1 || die "git is required"
+command -v brew > /dev/null 2>&1 || die "Homebrew is required — install from https://brew.sh"
+command -v git > /dev/null 2>&1 || die "git is required"
 
 if [[ -x /opt/homebrew/bin/brew ]]; then
   # shellcheck disable=SC1091

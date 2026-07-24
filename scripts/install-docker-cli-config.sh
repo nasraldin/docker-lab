@@ -7,7 +7,7 @@ require_cmd python3
 mkdir -p "$(dirname "${DOCKER_CONFIG_JSON}")"
 
 log "Ensuring Docker CLI can find Homebrew plugins (${CLI_PLUGINS_DIR})"
-python3 - "${DOCKER_CONFIG_JSON}" "${CLI_PLUGINS_DIR}" <<'PY'
+python3 - "${DOCKER_CONFIG_JSON}" "${CLI_PLUGINS_DIR}" << 'PY'
 import json
 import sys
 from pathlib import Path

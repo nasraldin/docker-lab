@@ -10,7 +10,7 @@ mkdir -p "$(dirname "${ZSHRC_FILE}")"
 [[ -f "${ZSHRC_FILE}" ]] || touch "${ZSHRC_FILE}"
 
 log "Installing managed shell block into ${ZSHRC_FILE}"
-python3 - "${ZSHRC_FILE}" "${ROOT_DIR}/config/zshrc.snippet" "${MARKER_BEGIN}" "${MARKER_END}" <<'PY'
+python3 - "${ZSHRC_FILE}" "${ROOT_DIR}/config/zshrc.snippet" "${MARKER_BEGIN}" "${MARKER_END}" << 'PY'
 import pathlib
 import re
 import sys

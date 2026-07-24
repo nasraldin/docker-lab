@@ -18,11 +18,11 @@ check() {
   fi
 }
 
-has_cmd() { command -v "$1" >/dev/null 2>&1; }
-compose_ok() { docker compose version >/dev/null 2>&1; }
-buildx_plugin_ok() { docker buildx version >/dev/null 2>&1; }
+has_cmd() { command -v "$1" > /dev/null 2>&1; }
+compose_ok() { docker compose version > /dev/null 2>&1; }
+buildx_plugin_ok() { docker buildx version > /dev/null 2>&1; }
 cli_plugins_ok() {
-  python3 - "${DOCKER_CONFIG_JSON}" "${CLI_PLUGINS_DIR}" <<'PY'
+  python3 - "${DOCKER_CONFIG_JSON}" "${CLI_PLUGINS_DIR}" << 'PY'
 import json, sys
 from pathlib import Path
 p, want = Path(sys.argv[1]), sys.argv[2]
@@ -32,25 +32,25 @@ PY
 }
 guest_arch_ok() {
   local arch
-  arch="$(limactl shell "${INSTANCE_NAME}" -- uname -m 2>/dev/null | tr -d '\r')"
+  arch="$(limactl shell "${INSTANCE_NAME}" -- uname -m 2> /dev/null | tr -d '\r')"
   [[ "${arch}" == "aarch64" ]]
 }
-docker_info_ok() { docker info >/dev/null 2>&1; }
+docker_info_ok() { docker info > /dev/null 2>&1; }
 snapshotter_ok() {
   # Avoid `grep -q | pipefail` SIGPIPE false failures against `docker info`
   local info
-  info="$(docker info 2>/dev/null || true)"
+  info="$(docker info 2> /dev/null || true)"
   [[ "${info}" == *"io.containerd.snapshotter"* ]]
 }
 rootless_ok() {
   local opts
-  opts="$(docker info --format '{{json .SecurityOptions}}' 2>/dev/null || true)"
+  opts="$(docker info --format '{{json .SecurityOptions}}' 2> /dev/null || true)"
   [[ "${opts}" == *rootless* ]]
 }
 buildx_default_ok() {
-  docker buildx inspect default >/dev/null 2>&1
+  docker buildx inspect default > /dev/null 2>&1
 }
-hello_ok() { docker run --rm hello-world >/dev/null 2>&1; }
+hello_ok() { docker run --rm hello-world > /dev/null 2>&1; }
 
 log "Verifying host tools"
 check "limactl present" has_cmd limactl

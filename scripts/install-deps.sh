@@ -27,10 +27,10 @@ if [[ ! -e "${CLI_PLUGINS_DIR}/docker-buildx" && ! -e "${CLI_PLUGINS_DIR}/buildx
   die "docker-buildx plugin not installed under ${CLI_PLUGINS_DIR}"
 fi
 
-if ! docker compose version >/dev/null 2>&1; then
+if ! docker compose version > /dev/null 2>&1; then
   die "docker compose still unavailable after wiring cliPluginsExtraDirs (${CLI_PLUGINS_DIR}). Check ${DOCKER_CONFIG_JSON}"
 fi
-if ! docker buildx version >/dev/null 2>&1; then
+if ! docker buildx version > /dev/null 2>&1; then
   die "docker buildx still unavailable after wiring cliPluginsExtraDirs (${CLI_PLUGINS_DIR}). Check ${DOCKER_CONFIG_JSON}"
 fi
 

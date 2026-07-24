@@ -7,7 +7,7 @@ BACKUP_ROOT="${BACKUP_ROOT:-${HOME}/.local/share/docker-lab/backups}"
 INCLUDE_VM=0
 
 usage() {
-  cat <<'EOF'
+  cat << 'EOF'
 Usage:
   ducker backup [--vm]
   ducker backup list
@@ -23,7 +23,7 @@ stamp_id() {
 
 list_backups() {
   mkdir -p "${BACKUP_ROOT}"
-  if [[ -z "$(ls -A "${BACKUP_ROOT}" 2>/dev/null || true)" ]]; then
+  if [[ -z "$(ls -A "${BACKUP_ROOT}" 2> /dev/null || true)" ]]; then
     log "No backups yet (ducker backup)"
     return 0
   fi
@@ -46,7 +46,7 @@ do_backup() {
   log "Backing up lab config → ${dir}"
   cp -f "${LIMA_TEMPLATE}" "${dir}/lima-docker.yaml"
   cp -f "${ROOT_DIR}/config/daemon.json" "${dir}/config/daemon.json"
-  cp -f "${ROOT_DIR}/config.env" "${dir}/config.env" 2>/dev/null || true
+  cp -f "${ROOT_DIR}/config.env" "${dir}/config.env" 2> /dev/null || true
   if [[ -f "${ROOT_DIR}/config/profiles/.active" ]]; then
     cp -f "${ROOT_DIR}/config/profiles/.active" "${dir}/profile.active"
   fi
@@ -58,7 +58,7 @@ do_backup() {
       $0 == b {p=1}
       p {print}
       $0 == e {p=0}
-    ' "${ZSHRC_FILE}" >"${dir}/host/zshrc.snippet"
+    ' "${ZSHRC_FILE}" > "${dir}/host/zshrc.snippet"
   fi
 
   if [[ "${INCLUDE_VM}" -eq 1 ]]; then
@@ -74,7 +74,7 @@ do_backup() {
     fi
   fi
 
-  printf '%s\n' "${id}" >"${dir}/BACKUP_ID"
+  printf '%s\n' "${id}" > "${dir}/BACKUP_ID"
   log "Backup complete: ${id}"
   log "Restore with: ducker restore ${id}"
 }
