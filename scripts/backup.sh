@@ -116,40 +116,40 @@ do_restore() {
 ARGS=()
 for a in "$@"; do
   case "${a}" in
-  --vm) INCLUDE_VM=1 ;;
-  -h | --help | help)
-    usage
-    exit 0
-    ;;
-  *) ARGS+=("${a}") ;;
+    --vm) INCLUDE_VM=1 ;;
+    -h | --help | help)
+      usage
+      exit 0
+      ;;
+    *) ARGS+=("${a}") ;;
   esac
 done
 
 MODE="${BACKUP_MODE:-}"
 if [[ -z "${MODE}" ]]; then
   case "${ARGS[0]:-}" in
-  restore)
-    MODE=restore
-    ARGS=("${ARGS[@]:1}")
-    ;;
-  list | ls)
-    MODE=list
-    ARGS=("${ARGS[@]:1}")
-    ;;
-  "" | backup)
-    MODE=backup
-    [[ "${ARGS[0]:-}" == "backup" ]] && ARGS=("${ARGS[@]:1}")
-    ;;
-  *) MODE=backup ;;
+    restore)
+      MODE=restore
+      ARGS=("${ARGS[@]:1}")
+      ;;
+    list | ls)
+      MODE=list
+      ARGS=("${ARGS[@]:1}")
+      ;;
+    "" | backup)
+      MODE=backup
+      [[ "${ARGS[0]:-}" == "backup" ]] && ARGS=("${ARGS[@]:1}")
+      ;;
+    *) MODE=backup ;;
   esac
 fi
 
 case "${MODE}" in
-list) list_backups ;;
-restore)
-  [[ -n "${ARGS[0]:-}" ]] || die "Usage: ducker restore <backup-id> [--vm]"
-  do_restore "${ARGS[0]}"
-  ;;
-backup) do_backup ;;
-*) die "Unknown backup mode: ${MODE}" ;;
+  list) list_backups ;;
+  restore)
+    [[ -n "${ARGS[0]:-}" ]] || die "Usage: ducker restore <backup-id> [--vm]"
+    do_restore "${ARGS[0]}"
+    ;;
+  backup) do_backup ;;
+  *) die "Unknown backup mode: ${MODE}" ;;
 esac

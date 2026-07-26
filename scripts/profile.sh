@@ -90,11 +90,11 @@ apply_profile() {
 
 CMD="${1:-list}"
 case "${CMD}" in
--h | --help | help) usage ;;
-list | ls) list_profiles ;;
-show | status) show_active ;;
-small | balanced | power) apply_profile "${CMD}" ;;
-*)
-  die "Unknown profile '${CMD}'. Use: small | balanced | power | list | show"
-  ;;
+  -h | --help | help) usage ;;
+  list | ls) list_profiles ;;
+  show | status) show_active ;;
+  small | balanced | power) apply_profile "${CMD}" ;;
+  *)
+    die "Unknown profile '${CMD}'. Use: small | balanced | power | list | show"
+    ;;
 esac

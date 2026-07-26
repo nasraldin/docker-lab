@@ -19,9 +19,9 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 FIX=0
 for a in "$@"; do
   case "${a}" in
-  --fix | fix) FIX=1 ;;
-  -h | --help | help)
-    cat <<'EOF'
+    --fix | fix) FIX=1 ;;
+    -h | --help | help)
+      cat <<'EOF'
 Usage: ducker doctor [--fix]
 
   ducker doctor         status + verify
@@ -36,8 +36,8 @@ Repairs (--fix):
   - re-apply guest daemon.json + restart user Docker
   - refresh buildx default when possible
 EOF
-    exit 0
-    ;;
+      exit 0
+      ;;
   esac
 done
 
@@ -110,10 +110,10 @@ fix_docker_context() {
     while IFS= read -r ctx; do
       [[ -n "${ctx}" ]] || continue
       case "${ctx}" in
-      lima-"${INSTANCE_NAME}" | lima-docker)
-        docker context rm "${ctx}" >/dev/null 2>&1 || true
-        fix_ok "removed leftover context ${ctx}"
-        ;;
+        lima-"${INSTANCE_NAME}" | lima-docker)
+          docker context rm "${ctx}" >/dev/null 2>&1 || true
+          fix_ok "removed leftover context ${ctx}"
+          ;;
       esac
     done < <(docker context ls -q 2>/dev/null || true)
   fi

@@ -13,12 +13,12 @@ brew bundle --file="${ROOT_DIR}/Brewfile"
 # Upgrade formulae named in Brewfile when already installed
 while read -r line; do
   case "${line}" in
-  brew\ *)
-    pkg="${line#brew }"
-    pkg="${pkg//\"/}"
-    pkg="${pkg//\'/}"
-    brew upgrade "${pkg}" 2>/dev/null || true
-    ;;
+    brew\ *)
+      pkg="${line#brew }"
+      pkg="${pkg//\"/}"
+      pkg="${pkg//\'/}"
+      brew upgrade "${pkg}" 2>/dev/null || true
+      ;;
   esac
 done <"${ROOT_DIR}/Brewfile"
 

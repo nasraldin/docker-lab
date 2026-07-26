@@ -172,8 +172,8 @@ purge_brew() {
 is_affirmative() {
   # Accept yes / YES / y / Y (typical terminal prompts)
   case "$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')" in
-  y | yes) return 0 ;;
-  *) return 1 ;;
+    y | yes) return 0 ;;
+    *) return 1 ;;
   esac
 }
 
@@ -221,25 +221,25 @@ nuke_all() {
 }
 
 case "${MODE}" in
-soft)
-  stop_instance
-  ;;
-instance)
-  delete_instance
-  ;;
-host)
-  delete_instance
-  remove_shell_block
-  remove_cli_plugins_dir
-  ;;
-purge | nuke)
-  confirm_nuke
-  nuke_all
-  warn "Full cleanup done. Reinstall with: cd ~/homelab/docker-lab && make install"
-  ;;
-*)
-  die "Unknown uninstall mode '${MODE}' (soft|instance|host|purge|nuke)"
-  ;;
+  soft)
+    stop_instance
+    ;;
+  instance)
+    delete_instance
+    ;;
+  host)
+    delete_instance
+    remove_shell_block
+    remove_cli_plugins_dir
+    ;;
+  purge | nuke)
+    confirm_nuke
+    nuke_all
+    warn "Full cleanup done. Reinstall with: cd ~/homelab/docker-lab && make install"
+    ;;
+  *)
+    die "Unknown uninstall mode '${MODE}' (soft|instance|host|purge|nuke)"
+    ;;
 esac
 
 log "Cleanup mode '${MODE}' complete"

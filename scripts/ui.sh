@@ -216,9 +216,9 @@ EOF
 
 ensure_env() {
   case "$1" in
-  arcane) ensure_env_arcane ;;
-  dockhand) ensure_env_dockhand ;;
-  *) die "No env generator for provider: $1" ;;
+    arcane) ensure_env_arcane ;;
+    dockhand) ensure_env_dockhand ;;
+    *) die "No env generator for provider: $1" ;;
   esac
   log "Wrote $(env_file "$1")"
 }
@@ -287,9 +287,9 @@ cmd_list() {
     mark=""
     [[ "$p" == "${def}" ]] && mark="*"
     case "$p" in
-    arcane) url="http://localhost:3552" ;;
-    dockhand) url="http://localhost:9090" ;;
-    *) url="-" ;;
+      arcane) url="http://localhost:3552" ;;
+      dockhand) url="http://localhost:9090" ;;
+      *) url="-" ;;
     esac
     printf '%-12s %-10s %-8s %s\n' "$p" "$status" "${mark:--}" "$url"
   done
@@ -313,12 +313,12 @@ cmd_install() {
   set +a
   log "UI (${p}) → ${APP_URL}"
   case "$p" in
-  arcane)
-    log "Login: arcane / arcane-admin (change on first sign-in)"
-    ;;
-  dockhand)
-    log "Complete the first-run admin wizard in the browser"
-    ;;
+    arcane)
+      log "Login: arcane / arcane-admin (change on first sign-in)"
+      ;;
+    dockhand)
+      log "Complete the first-run admin wizard in the browser"
+      ;;
   esac
 }
 
@@ -366,7 +366,7 @@ cmd_open() {
     url="${APP_URL}"
   else
     case "$p" in
-    dockhand) url="http://localhost:9090" ;;
+      dockhand) url="http://localhost:9090" ;;
     esac
   fi
   log "Opening ${p} → ${url}"
@@ -414,17 +414,17 @@ cmd_default() {
 }
 
 case "${ACTION}" in
-help | -h | --help) cmd_help ;;
-list | ls) cmd_list ;;
-install) cmd_install ;;
-up | start) cmd_up ;;
-down | stop) cmd_down ;;
-status | ps) cmd_status ;;
-open) cmd_open ;;
-uninstall | rm) cmd_uninstall ;;
-default | use) cmd_default ;;
-*)
-  cmd_help
-  die "Unknown action: ${ACTION}"
-  ;;
+  help | -h | --help) cmd_help ;;
+  list | ls) cmd_list ;;
+  install) cmd_install ;;
+  up | start) cmd_up ;;
+  down | stop) cmd_down ;;
+  status | ps) cmd_status ;;
+  open) cmd_open ;;
+  uninstall | rm) cmd_uninstall ;;
+  default | use) cmd_default ;;
+  *)
+    cmd_help
+    die "Unknown action: ${ACTION}"
+    ;;
 esac
