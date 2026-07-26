@@ -7,7 +7,7 @@ BACKUP_ROOT="${BACKUP_ROOT:-${HOME}/.local/share/docker-lab/backups}"
 INCLUDE_VM=0
 
 usage() {
-  cat << 'EOF'
+  cat <<'EOF'
 Usage:
   ducker backup [--vm]
   ducker backup list
@@ -23,7 +23,7 @@ stamp_id() {
 
 list_backups() {
   mkdir -p "${BACKUP_ROOT}"
-  if [[ -z "$(ls -A "${BACKUP_ROOT}" 2> /dev/null || true)" ]]; then
+  if [[ -z "$(ls -A "${BACKUP_ROOT}" 2>/dev/null || true)" ]]; then
     log "No backups yet (ducker backup)"
     return 0
   fi
@@ -46,7 +46,7 @@ do_backup() {
   log "Backing up lab config → ${dir}"
   cp -f "${LIMA_TEMPLATE}" "${dir}/lima-docker.yaml"
   cp -f "${ROOT_DIR}/config/daemon.json" "${dir}/config/daemon.json"
-  cp -f "${ROOT_DIR}/config.env" "${dir}/config.env" 2> /dev/null || true
+  cp -f "${ROOT_DIR}/config.env" "${dir}/config.env" 2>/dev/null || true
   if [[ -f "${ROOT_DIR}/config/profiles/.active" ]]; then
     cp -f "${ROOT_DIR}/config/profiles/.active" "${dir}/profile.active"
   fi
@@ -58,7 +58,7 @@ do_backup() {
       $0 == b {p=1}
       p {print}
       $0 == e {p=0}
-    ' "${ZSHRC_FILE}" > "${dir}/host/zshrc.snippet"
+    ' "${ZSHRC_FILE}" >"${dir}/host/zshrc.snippet"
   fi
 
   if [[ "${INCLUDE_VM}" -eq 1 ]]; then
@@ -74,7 +74,7 @@ do_backup() {
     fi
   fi
 
-  printf '%s\n' "${id}" > "${dir}/BACKUP_ID"
+  printf '%s\n' "${id}" >"${dir}/BACKUP_ID"
   log "Backup complete: ${id}"
   log "Restore with: ducker restore ${id}"
 }
@@ -116,40 +116,40 @@ do_restore() {
 ARGS=()
 for a in "$@"; do
   case "${a}" in
-    --vm) INCLUDE_VM=1 ;;
-    -h | --help | help)
-      usage
-      exit 0
-      ;;
-    *) ARGS+=("${a}") ;;
+  --vm) INCLUDE_VM=1 ;;
+  -h | --help | help)
+    usage
+    exit 0
+    ;;
+  *) ARGS+=("${a}") ;;
   esac
 done
 
 MODE="${BACKUP_MODE:-}"
 if [[ -z "${MODE}" ]]; then
   case "${ARGS[0]:-}" in
-    restore)
-      MODE=restore
-      ARGS=("${ARGS[@]:1}")
-      ;;
-    list | ls)
-      MODE=list
-      ARGS=("${ARGS[@]:1}")
-      ;;
-    "" | backup)
-      MODE=backup
-      [[ "${ARGS[0]:-}" == "backup" ]] && ARGS=("${ARGS[@]:1}")
-      ;;
-    *) MODE=backup ;;
+  restore)
+    MODE=restore
+    ARGS=("${ARGS[@]:1}")
+    ;;
+  list | ls)
+    MODE=list
+    ARGS=("${ARGS[@]:1}")
+    ;;
+  "" | backup)
+    MODE=backup
+    [[ "${ARGS[0]:-}" == "backup" ]] && ARGS=("${ARGS[@]:1}")
+    ;;
+  *) MODE=backup ;;
   esac
 fi
 
 case "${MODE}" in
-  list) list_backups ;;
-  restore)
-    [[ -n "${ARGS[0]:-}" ]] || die "Usage: ducker restore <backup-id> [--vm]"
-    do_restore "${ARGS[0]}"
-    ;;
-  backup) do_backup ;;
-  *) die "Unknown backup mode: ${MODE}" ;;
+list) list_backups ;;
+restore)
+  [[ -n "${ARGS[0]:-}" ]] || die "Usage: ducker restore <backup-id> [--vm]"
+  do_restore "${ARGS[0]}"
+  ;;
+backup) do_backup ;;
+*) die "Unknown backup mode: ${MODE}" ;;
 esac
