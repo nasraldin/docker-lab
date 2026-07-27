@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Apply or list VM resource profiles (small | balanced | power).
+# Apply or list VM resource profiles (small | balanced | homelab-36gb | power).
 # shellcheck shell=bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
@@ -11,7 +11,7 @@ usage() {
 Usage:
   ducker profile list
   ducker profile show
-  ducker profile <small|balanced|power>
+  ducker profile <small|balanced|homelab-36gb|power>
 
 Applies cpus/memory/disk to lima-docker.yaml and records the active profile.
 Changing size after the VM exists usually requires: ducker vm-uninstall && ducker lima
@@ -93,8 +93,8 @@ case "${CMD}" in
   -h | --help | help) usage ;;
   list | ls) list_profiles ;;
   show | status) show_active ;;
-  small | balanced | power) apply_profile "${CMD}" ;;
+  small | balanced | homelab-36gb | power) apply_profile "${CMD}" ;;
   *)
-    die "Unknown profile '${CMD}'. Use: small | balanced | power | list | show"
+    die "Unknown profile '${CMD}'. Use: small | balanced | homelab-36gb | power | list | show"
     ;;
 esac

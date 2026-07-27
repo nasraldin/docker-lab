@@ -60,12 +60,13 @@ Pick VM size **before** you create the instance (or delete and recreate after ch
 | Profile    | CPUs | Memory | Disk    | Good for                     |
 | ---------- | ---- | ------ | ------- | ---------------------------- |
 | `small`    | 4    | 8 GiB  | 60 GiB  | Lighter machines             |
+| `homelab-36gb` | 6    | 12 GiB | 150 GiB | 36 GB Mac (homelab default)  |
 | `balanced` | 6    | 16 GiB | 120 GiB | Day-to-day work              |
 | `power`    | 8    | 24 GiB | 200 GiB | Heavier builds (default-ish) |
 
 ```bash
 ducker profile list
-ducker profile balanced
+ducker profile homelab-36gb
 ducker install               # or ducker lima if you already installed once
 ```
 
@@ -130,7 +131,7 @@ ducker install
 | `Brewfile`            | Host packages            |
 | `lima-docker.yaml`    | Lima template            |
 | `config/daemon.json`  | Guest rootless dockerd   |
-| `config/profiles/`    | small / balanced / power |
+| `config/profiles/`    | small / balanced / homelab-36gb / power |
 | `apps/ui/<provider>/` | Optional UIs             |
 
 Next: [Architecture](architecture.md) · [Troubleshooting](troubleshooting.md)

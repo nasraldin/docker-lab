@@ -62,7 +62,7 @@ Usage:
 Setup:
   install                 Full lab: deps + config + lima + daemon + verify
   deps|config|lima|daemon Re-run one install piece
-  profile <name>          VM size: small | balanced | power | list | show
+  profile <name>          VM size: small | balanced | homelab-36gb | power | list | show
   verify                  Health checks
   doctor [--fix]         status + verify (optional common repairs)
   diagnose                Deep host + Lima + Docker diagnostics
@@ -102,7 +102,7 @@ Help:
 
 Examples:
   ducker install
-  ducker profile balanced
+  ducker profile homelab-36gb
   ducker doctor --fix
   ducker benchmark
   ducker upgrade

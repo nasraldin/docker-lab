@@ -37,7 +37,7 @@ UI_WORDS := install uninstall up down stop start status open default list ls \
 	purge nuke clean doctor sync-home-template test test-run shell restart \
 	cli-install cli-uninstall \
 	benchmark upgrade backup restore profile diagnose stats self-test \
-	small balanced power
+	small balanced homelab-36gb power
 
 # =============================================================================
 ifeq (ui,$(firstword $(MAKECMDGOALS)))
@@ -189,7 +189,7 @@ restore: ## Restore: make restore ARGS='<id>' (VM=1 for VM archive)
 	@$(RUN) "$(SCRIPTS)/restore.sh" $(ARGS) $(if $(filter 1,$(VM)),--vm,)
 
 .PHONY: profile
-profile: ## VM profiles: make profile ARGS='list|show|small|balanced|power'
+profile: ## VM profiles: make profile ARGS='list|show|small|balanced|homelab-36gb|power'
 	@$(RUN) "$(SCRIPTS)/profile.sh" $(or $(ARGS),list)
 
 .PHONY: sync-home-template
