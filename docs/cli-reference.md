@@ -344,10 +344,10 @@ WARN: Open a new terminal (or: source ~/.zshrc) so DOCKER_HOST is loaded
 
 | Area         | Repair                                                                                       |
 | ------------ | -------------------------------------------------------------------------------------------- |
-| Host tools   | Install Brewfile packages if `limactl` / `docker` / compose / buildx missing                 |
-| CLI plugins  | Merge `cliPluginsExtraDirs` into `~/.docker/config.json`                                     |
+| Host tools   | Install Brewfile packages if `limactl` / `docker` / compose / buildx / credential helper missing |
+| CLI config   | Merge `cliPluginsExtraDirs`, set `credsStore` to `osxkeychain`, remove Desktop plugin symlinks |
 | Shell env    | Re-install managed `DOCKER_HOST` block in `~/.zshrc`                                         |
-| Context      | Unset `DOCKER_CONTEXT`, prefer `default`, drop leftover `lima-*` contexts                    |
+| Context      | Unset `DOCKER_CONTEXT`, prefer `default`, drop leftover `lima-*` / `desktop-linux` contexts  |
 | Lima         | Force stop + start when instance exists but is not Running (stale hostagent)                 |
 | Socket       | Wait up to ~90s for the Lima Docker socket                                                   |
 | Guest daemon | Re-apply known-good `daemon.json` (removes bad keys like `cliPluginsExtraDirs` / `overlay2`) |

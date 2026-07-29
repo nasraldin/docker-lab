@@ -132,8 +132,11 @@ assert_cmd "config/daemon.json is valid JSON" \
 assert_cmd "zshrc.snippet has begin/end markers" \
   bash -c "grep -qF '${MARKER_BEGIN}' '${ROOT_DIR}/config/zshrc.snippet' && grep -qF '${MARKER_END}' '${ROOT_DIR}/config/zshrc.snippet'"
 
-assert_cmd "Brewfile lists lima + docker" \
-  bash -c "grep -q 'lima' '${ROOT_DIR}/Brewfile' && grep -q 'docker' '${ROOT_DIR}/Brewfile'"
+assert_cmd "Brewfile lists lima + docker + credential helper" \
+  bash -c "grep -q 'lima' '${ROOT_DIR}/Brewfile' && grep -q 'docker' '${ROOT_DIR}/Brewfile' && grep -q 'docker-credential-helper' '${ROOT_DIR}/Brewfile'"
+
+assert_cmd "install-docker-cli-config sets osxkeychain credsStore" \
+  bash -c "grep -q 'osxkeychain' '${ROOT_DIR}/scripts/install-docker-cli-config.sh'"
 
 assert_cmd "install-deps wires Docker CLI plugins before compose check" \
   bash -c "grep -q 'install-docker-cli-config.sh' '${ROOT_DIR}/scripts/install-deps.sh'"

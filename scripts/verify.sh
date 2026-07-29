@@ -30,6 +30,27 @@ cfg = json.loads(p.read_text())
 sys.exit(0 if want in cfg.get("cliPluginsExtraDirs", []) else 1)
 PY
 }
+credential_helper_ok() {
+  local store
+  store="$(python3 - "${DOCKER_CONFIG_JSON}" <<'PY'
+import json, sys
+from pathlib import Path
+p = Path(sys.argv[1])
+if not p.exists():
+    sys.exit(0)
+cfg = json.loads(p.read_text())
+print(cfg.get("credsStore", ""))
+PY
+)"
+  case "${store}" in
+    "" | osxkeychain)
+      command -v docker-credential-osxkeychain >/dev/null 2>&1
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+}
 guest_arch_ok() {
   local arch
   arch="$(limactl shell "${INSTANCE_NAME}" -- uname -m 2>/dev/null | tr -d '\r')"
@@ -58,6 +79,7 @@ check "docker present" has_cmd docker
 check "docker compose plugin" compose_ok
 check "docker buildx plugin" buildx_plugin_ok
 check "cliPluginsExtraDirs configured" cli_plugins_ok
+check "docker credential helper (osxkeychain)" credential_helper_ok
 
 log "Verifying Lima instance '${INSTANCE_NAME}'"
 check "instance exists" lima_exists

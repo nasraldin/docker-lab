@@ -7,15 +7,16 @@ Normal path: `ducker install`. The steps below are roughly what the scripts do.
 ### 1. Host tools
 
 ```bash
-brew install lima docker docker-compose docker-buildx yq jq
+brew install lima docker docker-compose docker-buildx docker-credential-helper yq jq
 ```
 
 Optional: `lima-additional-guestagents` only if the guest arch isn’t native. Skip that for `aarch64` Debian on Apple Silicon.
 
-Wire plugins in `~/.docker/config.json`:
+Wire plugins and the macOS credential helper in `~/.docker/config.json` (or run `ducker deps`, which does this for you):
 
 ```json
 {
+  "credsStore": "osxkeychain",
   "cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]
 }
 ```

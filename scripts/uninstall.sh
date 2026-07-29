@@ -186,7 +186,7 @@ confirm_nuke() {
   printf '  - Managed DOCKER_HOST block in ~/.zshrc\n'
   printf '  - Homebrew cliPluginsExtraDirs entry\n'
   printf '  - ~/lima-docker.yaml (if present)\n'
-  printf '  - Brew formulae from Brewfile (lima, docker, compose, buildx, yq, jq)\n'
+  printf '  - Brew formulae from Brewfile (lima, docker, compose, buildx, docker-credential-helper, yq, jq)\n'
   printf '  - UI local state (apps/ui/.default and provider .env files)\n'
   printf 'Does NOT delete this repo (~/homelab/docker-lab).\n\n'
 

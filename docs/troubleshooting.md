@@ -21,6 +21,8 @@ ducker verify
 | `cliPluginsExtraDirs` in daemon.json → Docker won’t start        | `ducker doctor --fix` rewrites a known-good guest `daemon.json`            |
 | buildx `default` error on `/var/run/docker.sock`                 | `ducker doctor --fix` (sets `DOCKER_HOST` + clears context)                |
 | Compose/buildx “unknown command”                                 | `ducker doctor --fix` or `ducker deps`                                     |
+| `docker-credential-osxkeychain`: executable file not found         | `ducker doctor --fix` or `brew install docker-credential-helper`           |
+| Plugin `docker-sbom` not valid / broken Desktop symlinks         | `ducker doctor --fix` (removes Desktop plugin symlinks)                    |
 | Docker unreachable but VM is Running                             | `ducker doctor --fix` (wait for socket + restart guest Docker)             |
 | Harmless restart warning `127.0.0.1:5355 address already in use` | LLMNR collision — ignore unless you need that forward                      |
 | `manifest.v1+prettyjws is no longer supported`                   | Image too old — pick a maintained one                                      |

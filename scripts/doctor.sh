@@ -3,7 +3,7 @@
 #
 # --fix coverage (idempotent, best-effort):
 #   1. Missing Homebrew host tools (Brewfile)
-#   2. Docker CLI plugins (cliPluginsExtraDirs)
+#   2. Docker CLI plugins + credential store (cliPluginsExtraDirs, osxkeychain)
 #   3. Managed DOCKER_HOST block in ~/.zshrc
 #   4. Clear sticky DOCKER_CONTEXT / prefer default context
 #   5. Stuck / Stopped Lima instance (force stop + start)
@@ -80,9 +80,9 @@ fix_host_tools() {
 }
 
 fix_cli_plugins() {
-  log "Fix: Docker CLI plugins (cliPluginsExtraDirs)"
+  log "Fix: Docker CLI config (plugins + credential store)"
   if bash "${ROOT_DIR}/scripts/install-docker-cli-config.sh"; then
-    fix_ok "merged cliPluginsExtraDirs into ${DOCKER_CONFIG_JSON}"
+    fix_ok "updated ${DOCKER_CONFIG_JSON} (cliPluginsExtraDirs + osxkeychain)"
   else
     fix_warn "could not update ${DOCKER_CONFIG_JSON}"
   fi
@@ -110,7 +110,7 @@ fix_docker_context() {
     while IFS= read -r ctx; do
       [[ -n "${ctx}" ]] || continue
       case "${ctx}" in
-        lima-"${INSTANCE_NAME}" | lima-docker)
+        lima-"${INSTANCE_NAME}" | lima-docker | desktop-linux)
           docker context rm "${ctx}" >/dev/null 2>&1 || true
           fix_ok "removed leftover context ${ctx}"
           ;;

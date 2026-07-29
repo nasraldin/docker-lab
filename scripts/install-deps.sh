@@ -15,7 +15,7 @@ brew bundle --file="${ROOT_DIR}/Brewfile"
 bash "${ROOT_DIR}/scripts/install-docker-cli-config.sh"
 
 log "Verifying binaries"
-require_cmd limactl docker yq jq
+require_cmd limactl docker docker-credential-osxkeychain yq jq
 
 if [[ ! -d "${CLI_PLUGINS_DIR}" ]]; then
   die "Docker CLI plugins dir missing: ${CLI_PLUGINS_DIR}"

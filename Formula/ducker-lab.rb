@@ -23,6 +23,7 @@ class DuckerLab < Formula
   depends_on "docker"
   depends_on "docker-compose"
   depends_on "docker-buildx"
+  depends_on "docker-credential-helper"
   depends_on "yq"
   depends_on "jq"
   depends_on :macos

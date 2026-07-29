@@ -6,7 +6,7 @@ It gives you Docker on a Mac without Desktop: a real Debian VM on Apple’s nati
 
 ## Do I need Docker Desktop installed?
 
-No. Quit or uninstall Desktop if it fights over `/var/run/docker.sock`. This lab points `DOCKER_HOST` at Lima’s socket.
+No. Quit or uninstall Desktop if it fights over `/var/run/docker.sock`. This lab points `DOCKER_HOST` at Lima’s socket and uses Homebrew’s `docker-credential-osxkeychain` for registry credentials (installed via the Brewfile).
 
 ## Why Debian instead of Ubuntu?
 
