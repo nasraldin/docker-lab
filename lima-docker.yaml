@@ -35,6 +35,21 @@ provision:
     script: |
       #!/bin/sh
       sed -i 's/host.lima.internal.*/host.lima.internal host.docker.internal/' /etc/hosts
+  # DNS: bypass the Lima gateway forwarder and use public resolvers directly.
+  # The gateway (192.168.5.2) forwards to the host's DNS (VPN-controlled), which
+  # intermittently fails to resolve external names — docker pulls then die with
+  # "no such host" on registry blobs (production.cloudfront.docker.com).
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux -o pipefail
+      mkdir -p /etc/systemd/resolved.conf.d
+      cat > /etc/systemd/resolved.conf.d/50-public-dns.conf <<'EOF'
+      [Resolve]
+      DNS=8.8.8.8 1.1.1.1
+      FallbackDNS=9.9.9.9
+      EOF
+      systemctl restart systemd-resolved
   - mode: system
     script: |
       #!/bin/bash
