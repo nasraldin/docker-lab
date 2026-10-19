@@ -46,8 +46,8 @@ provision:
       mkdir -p /etc/systemd/resolved.conf.d
       cat > /etc/systemd/resolved.conf.d/50-public-dns.conf <<'EOF'
       [Resolve]
-      DNS=8.8.8.8 1.1.1.1
-      FallbackDNS=9.9.9.9
+      DNS=9.9.9.9 9.9.9.1
+      FallbackDNS=1.1.1.1
       EOF
       systemctl restart systemd-resolved
   - mode: system
