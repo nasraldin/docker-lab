@@ -39,6 +39,9 @@ provision:
   # The gateway (192.168.5.2) forwards to the host's DNS (VPN-controlled), which
   # intermittently fails to resolve external names — docker pulls then die with
   # "no such host" on registry blobs (production.cloudfront.docker.com).
+  # Two layers: global fallback (resolved.conf.d) and per-link override (netplan),
+  # because cloud-init seeds the gateway DNS into netplan and per-link servers
+  # take precedence over the global ones on every reboot.
   - mode: system
     script: |
       #!/bin/bash
@@ -50,6 +53,23 @@ provision:
       FallbackDNS=1.1.1.1
       EOF
       systemctl restart systemd-resolved
+      cat > /etc/netplan/99-dns-quad9.yaml <<'EOF'
+      network:
+        version: 2
+        ethernets:
+          eth0:
+            dhcp4: true
+            dhcp4-overrides:
+              route-metric: 200
+              use-dns: false
+            nameservers:
+              addresses: [9.9.9.9, 9.9.9.1]
+      EOF
+      chmod 600 /etc/netplan/99-dns-quad9.yaml
+      # cloud-init seeds the gateway resolver into netplan; replace it
+      sed -i 's/- 192\.168\.5\.2/- 9.9.9.9\n        - 9.9.9.1/' \
+        /etc/netplan/50-cloud-init.yaml 2>/dev/null || true
+      netplan apply
   - mode: system
     script: |
       #!/bin/bash
