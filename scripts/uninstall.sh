@@ -65,7 +65,8 @@ prune_guest_docker() {
   lima_running || return 0
   command -v docker >/dev/null 2>&1 || return 0
 
-  export DOCKER_HOST="unix://${HOME}/.lima/${INSTANCE_NAME}/sock/docker.sock"
+  DOCKER_HOST="$(lima_docker_host)"
+  export DOCKER_HOST
   unset DOCKER_CONTEXT || true
 
   if ! docker info >/dev/null 2>&1; then
@@ -95,7 +96,7 @@ delete_instance() {
   fi
 
   # Leftover dir if delete was interrupted
-  local inst_dir="${HOME}/.lima/${INSTANCE_NAME}"
+  local inst_dir="${LIMA_HOME}/${INSTANCE_NAME}"
   if [[ -e "${inst_dir}" ]]; then
     log "Removing leftover instance directory ${inst_dir}"
     rm -rf "${inst_dir}"
@@ -115,8 +116,8 @@ prune_lima_caches() {
 # Full wipe of ~/.lima (instances, _config, _networks, leftovers).
 # Used only by nuke/purge — other modes keep sibling Lima VMs intact.
 remove_lima_home() {
-  local lima_home="${HOME}/.lima"
-  if [[ ! -e "${lima_home}" ]]; then
+  local default_lima_home="${HOME}/.lima"
+  if [[ ! -e "${default_lima_home}" ]]; then
     log "${HOME}/.lima already absent"
     return 0
   fi
@@ -133,11 +134,11 @@ remove_lima_home() {
     done < <(limactl list -q 2>/dev/null || true)
   fi
 
-  log "Removing ${lima_home}"
-  rm -rf "${lima_home}"
+  log "Removing ${default_lima_home}"
+  rm -rf "${default_lima_home}"
 
-  if [[ -e "${lima_home}" ]]; then
-    die "Failed to remove ${lima_home} — check permissions / open files"
+  if [[ -e "${default_lima_home}" ]]; then
+    die "Failed to remove ${default_lima_home} — check permissions / open files"
   fi
   log "${HOME}/.lima removed"
 }

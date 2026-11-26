@@ -89,6 +89,7 @@ nav:
       - Advanced: advanced.md
   - Operations:
       - CLI reference: cli-reference.md
+      - Lab operations: lab-operations.md
       - Troubleshooting: troubleshooting.md
       - Screenshots: screenshots/index.md
   - Project:

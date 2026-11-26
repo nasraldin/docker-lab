@@ -32,9 +32,9 @@ if [[ -f "$ROOT/config.env" ]]; then
 fi
 
 DUCKER_COMMANDS=(
-  install deps config lima daemon verify doctor diagnose
-  start stop restart status list stats shell
-  ui test self-test test-run benchmark
+  install deps config lima daemon verify doctor diagnose disk
+  start stop restart status list stats shell instance
+  ui lab test self-test test-run benchmark
   upgrade backup restore profile
   vm-uninstall lab-uninstall uninstall uninstall-host purge nuke clean
   sync-home-template
@@ -66,21 +66,28 @@ Setup:
   verify                  Health checks
   doctor [--fix]         status + verify (optional common repairs)
   diagnose                Deep host + Lima + Docker diagnostics
+  disk [prune|monitor]    Storage report, cache cleanup, and low-space alerts
   test | self-test        Project self-test (LIVE=1 for running VM)
   test-run                alpine + stress-ng smoke test
   benchmark               Disk I/O, pull, and container timings
 
 Lifecycle:
+  --instance NAME         Select a Lima instance for a command
+  instance create|list|context  Manage named Lima instances
   start|stop|restart      Lima VM
   status|list             VM + Docker status
   stats                   Live docker stats + guest summary
   shell                   Shell into the Lima guest
-  upgrade                 Upgrade brew tools + re-apply config
+  upgrade [--plan]        Upgrade brew tools and re-apply config, or preview changes
 
 Backup:
   backup [--vm]           Snapshot lab config (optional VM archive)
-  backup list             List backups
+  backup list|verify <id> List backups or verify archive integrity
   restore <id> [--vm]     Restore a backup
+  restore <id> --vm --into NAME  Rehearse recovery in a separate VM
+
+Compose labs:
+  lab start|status|stop   PostgreSQL and Redis on the selected instance
 
 Optional UI:
   ui <cmd> [provider]     e.g. ducker ui install dockhand
@@ -288,6 +295,23 @@ cli_uninstall() {
   [[ "$removed" -eq 1 ]] || echo "==> No global ducker symlink found"
 }
 
+if [[ "${1:-}" == --instance ]]; then
+  [[ $# -ge 3 && "$2" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+    echo "Usage: ducker --instance NAME COMMAND [ARGS...]" >&2
+    exit 1
+  }
+  export INSTANCE_NAME="$2"
+  export DOCKER_HOST="unix://${LIMA_HOME:-${HOME}/.lima}/${INSTANCE_NAME}/sock/docker.sock"
+  unset DOCKER_CONTEXT
+  shift 2
+  case "$1" in
+    install | config | deps | doctor | instance | lab-uninstall | uninstall-host | nuke | purge)
+      echo "ERROR: '$1' manages host configuration; use per-instance lifecycle commands" >&2
+      exit 1
+      ;;
+  esac
+fi
+
 CMD="${1:-help}"
 shift || true
 
@@ -303,6 +327,12 @@ case "$CMD" in
     ;;
   doctor)
     run_script doctor.sh "$@"
+    ;;
+  instance)
+    run_script instance.sh "$@"
+    ;;
+  disk)
+    run_script disk.sh "$@"
     ;;
   diagnose)
     run_script diagnose.sh "$@"
@@ -336,6 +366,9 @@ case "$CMD" in
     ;;
   list | ls)
     run_make status
+    ;;
+  lab)
+    run_script lab.sh "$@"
     ;;
   ui)
     run_make ui "$@"

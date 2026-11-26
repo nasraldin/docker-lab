@@ -121,7 +121,7 @@ restart: ## Restart the Lima instance
 status: ## Show Lima + Docker status
 	@limactl list || true
 	@echo
-	@DOCKER_HOST="unix://${HOME}/.lima/$(INSTANCE_NAME)/sock/docker.sock" \
+	@DOCKER_HOST="unix://$${LIMA_HOME:-$${HOME}/.lima}/$(INSTANCE_NAME)/sock/docker.sock" \
 		DOCKER_CONTEXT= \
 		docker info --format 'Server={{.ServerVersion}} OS={{.OperatingSystem}} Arch={{.Architecture}}' 2>/dev/null \
 		|| echo 'Docker server: unreachable (is the VM running?)'
@@ -157,10 +157,10 @@ self-test: test ## Alias for test
 
 .PHONY: test-run
 test-run: ## Smoke-test with alpine + stress-ng (needs running VM)
-	@DOCKER_HOST="unix://${HOME}/.lima/$(INSTANCE_NAME)/sock/docker.sock" \
+	@DOCKER_HOST="unix://$${LIMA_HOME:-$${HOME}/.lima}/$(INSTANCE_NAME)/sock/docker.sock" \
 		DOCKER_CONTEXT= \
 		docker run --rm alpine uname -a
-	@DOCKER_HOST="unix://${HOME}/.lima/$(INSTANCE_NAME)/sock/docker.sock" \
+	@DOCKER_HOST="unix://$${LIMA_HOME:-$${HOME}/.lima}/$(INSTANCE_NAME)/sock/docker.sock" \
 		DOCKER_CONTEXT= \
 		docker run --rm ghcr.io/colinianking/stress-ng --cpu 2 --timeout 10s --metrics-brief
 
