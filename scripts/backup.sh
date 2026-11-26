@@ -390,11 +390,13 @@ case "${1:-}" in
     ;;
   "" | --vm | backup)
     if [[ "${1:-}" == backup ]]; then shift; fi
-    case "${*}" in
-      "") do_backup 0 ;;
-      --vm) do_backup 1 ;;
-      *) die "Usage: ducker backup [--vm]" ;;
-    esac
+    if [[ "$#" -eq 0 ]]; then
+      do_backup 0
+    elif [[ "$#" -eq 1 && "$1" == --vm ]]; then
+      do_backup 1
+    else
+      die "Usage: ducker backup [--vm]"
+    fi
     ;;
   *) die "Unknown backup argument: $1" ;;
 esac
