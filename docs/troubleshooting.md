@@ -28,6 +28,53 @@ ducker verify
 | `manifest.v1+prettyjws is no longer supported`                   | Image too old — pick a maintained one                                      |
 | No Lima instance at all                                          | `ducker install` (doctor will not create one)                              |
 
+## Private hostnames resolve to public addresses
+
+Add site-specific hostname mappings to `${LIMA_HOME:-$HOME/.lima}/_config/override.yaml` on the Mac. This override applies to instances under that Lima home. Edit the existing `hostResolver.hosts` map when a hostname changes and start the affected VM again so its host agent loads the new entries. For example:
+
+```yaml
+hostResolver:
+  hosts:
+    registry.lab.example: 192.0.2.40
+    packages.lab.example: 192.0.2.40
+```
+
+Verify both the instance settings and normal guest resolution:
+
+```bash
+limactl list -f '{{json .Config}}' docker | jq '.hostResolver.hosts'
+limactl shell docker -- getent ahostsv4 registry.lab.example
+limactl shell docker -- resolvectl dns
+limactl shell docker -- resolvectl domain
+```
+
+If the effective config looks right but `getent` returns a public address, query the Lima resolver directly with `dig` in the guest. Use the address of the Lima DNS server from the preceding check. For a guest that reports `192.168.5.2` on its Lima link:
+
+```bash
+limactl shell docker -- dig +short @192.168.5.2 registry.lab.example A
+```
+
+Guests configured with split DNS may use public DNS by default and reserve the Lima resolver for a list of route-only domains. If the direct query returns the private address, add the private hostnames as route-only domains on the link already using Lima DNS. On a guest using systemd-networkd, `networkctl status eth0` shows the active network file. For an active file named `10-netplan-eth0.network`, add this drop-in inside the guest:
+
+```ini
+# /etc/systemd/network/10-netplan-eth0.network.d/60-lima-host-overrides.conf
+[Network]
+Domains=~registry.lab.example ~packages.lab.example
+```
+
+Keep the existing routing domains and public DNS settings. Reload the network configuration during an idle window, flush cached DNS answers, and check both a private hostname and a public hostname:
+
+```bash
+limactl shell docker -- sudo networkctl reload
+limactl shell docker -- sudo resolvectl flush-caches
+limactl shell docker -- getent ahostsv4 registry.lab.example
+limactl shell docker -- getent ahostsv4 github.com
+```
+
+If a CI runner runs inside Docker, repeat the lookup inside a runner container with `docker exec <runner> getent ahostsv4 registry.lab.example`. Check the runner's online status in GitHub Actions separately.
+
+See [Lima DNS](https://lima-vm.io/docs/config/network/user/#dns-19216853) and [systemd network DNS routing](https://www.freedesktop.org/software/systemd/man/latest/systemd.network.html#Domains=).
+
 ## Guest disk I/O errors with low macOS disk space
 
 `ducker diagnose` shows free space on the macOS filesystem holding the Lima disk and
