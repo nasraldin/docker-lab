@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
 
@@ -49,7 +49,7 @@ jobs:
             { echo "::error::Set HOMEBREW_TAP_DEPLOY_KEY. See docs/homebrew.md."; exit 1; }
 
       - name: Checkout Homebrew tap
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           repository: nasraldin/homebrew-tools
           ref: main
