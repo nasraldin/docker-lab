@@ -19,15 +19,15 @@ class DuckerLab < Formula
   sha256 "afb8149d0ff6c4aa4cafe591b4f1fc1c02803fede5c285d26479d5c54d1e1c0e"
   license "MIT"
 
-  depends_on "lima"
-  depends_on "docker"
-  depends_on "docker-compose"
-  depends_on "docker-buildx"
-  depends_on "docker-credential-helper"
-  depends_on "yq"
-  depends_on "jq"
-  depends_on :macos
   depends_on arch: :arm64
+  depends_on "docker"
+  depends_on "docker-buildx"
+  depends_on "docker-compose"
+  depends_on "docker-credential-helper"
+  depends_on "jq"
+  depends_on "lima"
+  depends_on :macos
+  depends_on "yq"
 
   def install
     prefix.install Dir["*"]
