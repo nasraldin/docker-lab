@@ -30,7 +30,7 @@ git push origin v1.0.0
 gh release create v1.0.0 --generate-notes
 ```
 
-6. **Homebrew** — if `HOMEBREW_TAP_TOKEN` is set, `.github/workflows/homebrew.yml` updates `nasraldin/homebrew-tools` (see [Homebrew](homebrew.md)).
+6. **Homebrew** — `.github/workflows/homebrew.yml` updates `nasraldin/homebrew-tools` using `HOMEBREW_TAP_DEPLOY_KEY` (see [Homebrew](homebrew.md)).
 7. Smoke-test on a clean Mac:
 
 ```bash

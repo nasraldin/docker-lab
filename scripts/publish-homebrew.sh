@@ -6,8 +6,8 @@
 #   TAP_REPO=nasraldin/homebrew-tools ./scripts/publish-homebrew.sh v1.0.0
 #
 # Env:
-#   TAP_REPO   default: nasraldin/homebrew-tools
-#   GH_TOKEN   optional; used by gh when set (CI uses HOMEBREW_TAP_TOKEN)
+#   TAP_REPO       default: nasraldin/homebrew-tools
+#   TAP_CHECKOUT   optional path to a tap checkout with push credentials
 # shellcheck shell=bash
 set -euo pipefail
 
@@ -28,10 +28,6 @@ FORMULA_NAME="ducker-lab"
 VERSION="${TAG#v}"
 TARBALL_URL="https://github.com/nasraldin/docker-lab/archive/refs/tags/${TAG}.tar.gz"
 
-command -v gh >/dev/null 2>&1 || {
-  echo "ERROR: gh CLI required" >&2
-  exit 1
-}
 command -v shasum >/dev/null 2>&1 || command -v sha256sum >/dev/null 2>&1 || {
   echo "ERROR: shasum or sha256sum required" >&2
   exit 1
@@ -53,9 +49,15 @@ WORKDIR="$(mktemp -d)"
 cleanup() { rm -rf "${WORKDIR}"; }
 trap cleanup EXIT
 
-echo "==> Cloning ${TAP_REPO}"
-gh repo clone "${TAP_REPO}" "${WORKDIR}/tap" -- --depth 1
-mkdir -p "${WORKDIR}/tap/Formula"
+if [[ -n "${TAP_CHECKOUT:-}" ]]; then
+  TAP_DIR="${TAP_CHECKOUT}"
+  git -C "${TAP_DIR}" remote get-url origin >/dev/null
+else
+  TAP_DIR="${WORKDIR}/tap"
+  echo "==> Cloning ${TAP_REPO}"
+  gh repo clone "${TAP_REPO}" "${TAP_DIR}" -- --depth 1
+fi
+mkdir -p "${TAP_DIR}/Formula"
 
 # Render formula from template in this repo
 TEMPLATE="${ROOT}/Formula/${FORMULA_NAME}.rb"
@@ -69,14 +71,14 @@ awk -v url="${TARBALL_URL}" -v sha="${SHA}" '
   /^  url "/ { print "  url \"" url "\""; next }
   /^  sha256 "/ { print "  sha256 \"" sha "\""; next }
   { print }
-' "${TEMPLATE}" >"${WORKDIR}/tap/Formula/${FORMULA_NAME}.rb"
+' "${TEMPLATE}" >"${TAP_DIR}/Formula/${FORMULA_NAME}.rb"
 
 # Remove legacy formula name if present (homebrew-core owns plain "ducker")
-rm -f "${WORKDIR}/tap/Formula/ducker.rb"
+rm -f "${TAP_DIR}/Formula/ducker.rb"
 
 # Ensure README exists
-if [[ ! -f "${WORKDIR}/tap/README.md" ]]; then
-  cat >"${WORKDIR}/tap/README.md" <<'EOF'
+if [[ ! -f "${TAP_DIR}/README.md" ]]; then
+  cat >"${TAP_DIR}/README.md" <<'EOF'
 # nasraldin/homebrew-tools
 
 Homebrew tap for Nasr Aldin tools.
@@ -91,18 +93,15 @@ The CLI binary is still `ducker`.
 EOF
 fi
 
-cd "${WORKDIR}/tap"
+cd "${TAP_DIR}"
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-# Authenticate HTTPS push to the tap (gh clone works; bare git push needs a token URL).
-if [[ -n "${GH_TOKEN:-}" ]]; then
-  git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${TAP_REPO}.git"
-fi
 
 git add Formula/"${FORMULA_NAME}.rb" README.md
 git add -u Formula/ducker.rb 2>/dev/null || true
 if git diff --cached --quiet; then
+  # Check write authentication even when a retry has no formula changes.
+  git push --dry-run origin HEAD
   echo "==> No changes (formula already up to date for ${TAG})"
   exit 0
 fi

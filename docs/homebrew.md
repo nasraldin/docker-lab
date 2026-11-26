@@ -20,7 +20,7 @@ The tap repo is [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebr
 | Formula in docker-lab          | `Formula/ducker-lab.rb`                                                   |
 | Tap repo                       | [`nasraldin/homebrew-tools`](https://github.com/nasraldin/homebrew-tools) |
 | Local clone (handy)            | `~/homelab/homebrew/homebrew-tools`                                       |
-| Auto-update on GitHub Release  | workflow (token must **push** to tap)                                     |
+| Auto-update on GitHub Release  | workflow with a tap-scoped deploy key                                     |
 | Official Homebrew core         | not used — custom tap only                                                |
 | First release `v1.0.0` formula | published to the tap                                                      |
 
@@ -67,13 +67,15 @@ Moving folders on disk does **not** update GitHub. Commit and push in `homebrew-
 
 The docker-lab release workflow needs permission to push to `homebrew-tools`.
 
-1. GitHub → **Settings → Developer settings → Personal access tokens**
-2. Create a **fine-grained** token:
-   - Resource owner: `nasraldin`
-   - Repo access: only `homebrew-tools`
-   - Permissions: **Contents: Read and write**
-3. In **docker-lab** → Settings → Secrets and variables → Actions  
-   Add secret: **`HOMEBREW_TAP_TOKEN`** = that token
+1. Generate a dedicated SSH deploy key for this workflow.
+2. In **homebrew-tools → Settings → Deploy keys**, add the public key and select **Allow write access**.
+3. In **docker-lab → Settings → Secrets and variables → Actions**, store the private key as **`HOMEBREW_TAP_DEPLOY_KEY`**.
+
+To check publishing permissions against an already published version, run:
+
+```bash
+gh workflow run homebrew.yml --ref main -f tag=v1.0.1
+```
 
 ### Check it works (after the formula has a real sha256)
 
@@ -122,7 +124,7 @@ brew upgrade ducker-lab
 ### Manual publish (no CI secret)
 
 ```bash
-# from docker-lab
+# from docker-lab, with Git authenticated to the tap
 ./scripts/publish-homebrew.sh v1.0.0
 ```
 
@@ -154,7 +156,7 @@ SHA="$(curl -fsSL "${URL}" | shasum -a 256 | awk '{print $1}')"
 | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `brew info ducker` shows a TUI / ducker.soane.io | That’s **homebrew-core** — unrelated. Use `brew info ducker-lab`                                                                                           |
 | `Error: Formula unavailable`                     | `brew tap nasraldin/tools` then `brew update`                                                                                                              |
-| CI “Homebrew” fails: permission denied / 403     | Token lacks **Contents: Write** on `homebrew-tools`, or expired. Fix the secret, or run `./scripts/publish-homebrew.sh vX.Y.Z` locally with `gh` logged in |
+| CI “Homebrew” fails: permission denied / 403     | Check that the tap deploy key allows writes and matches `HOMEBREW_TAP_DEPLOY_KEY`. For manual publishing, use `./scripts/publish-homebrew.sh vX.Y.Z` with `gh` and Git authenticated |
 | `sha256 mismatch`                                | Tag was moved — don’t retag; cut a new version                                                                                                             |
 | Old formula after release                        | `brew update && brew upgrade ducker-lab`                                                                                                                   |
 | Local tap folder moved but GitHub unchanged      | Push from `~/homelab/homebrew/homebrew-tools`                                                                                                              |
