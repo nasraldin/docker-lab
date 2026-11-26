@@ -17,6 +17,7 @@ The longer goal is simpler:
 - [x] CLI reference with sample command + output
 - [x] Homebrew tap (`ducker-lab`) + release workflow
 - [x] Broader `ducker doctor --fix`
+- [x] Disk alerts and cache cleanup preview, upgrade planning, named instances, backup verification, and a data lab
 - [ ] Real CLI/UI PNG screenshots refreshed each release
 - [x] Diagram assets (install flow, stack, roadmap, release channels)
 

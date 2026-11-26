@@ -96,6 +96,8 @@ ducker help
 LIVE=1 ducker test         # needs a running VM
 ```
 
+For disk alerts, named Lima instances, recovery rehearsals, and the PostgreSQL/Redis lab, see [Lab operations](docs/lab-operations.md).
+
 Install details: [Installation](https://nasraldin.github.io/docker-lab/installation/).  
 Every command with sample output: [CLI reference](https://nasraldin.github.io/docker-lab/cli-reference/).
 

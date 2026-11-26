@@ -78,12 +78,13 @@ Lifecycle:
   status|list             VM + Docker status
   stats                   Live docker stats + guest summary
   shell                   Shell into the Lima guest
-  upgrade                 Upgrade brew tools + re-apply config
+  upgrade [--plan]        Upgrade brew tools and re-apply config, or preview changes
 
 Backup:
   backup [--vm]           Snapshot lab config (optional VM archive)
-  backup list             List backups
+  backup list|verify <id> List backups or verify archive integrity
   restore <id> [--vm]     Restore a backup
+  restore <id> --vm --into NAME  Rehearse recovery in a separate VM
 
 Compose labs:
   lab start|status|stop   PostgreSQL and Redis on the selected instance

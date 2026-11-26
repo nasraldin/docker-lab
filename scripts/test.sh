@@ -73,6 +73,14 @@ REQUIRED_FILES=(
   "${ROOT_DIR}/scripts/backup.sh"
   "${ROOT_DIR}/scripts/restore.sh"
   "${ROOT_DIR}/scripts/profile.sh"
+  "${ROOT_DIR}/scripts/instance.sh"
+  "${ROOT_DIR}/scripts/disk.sh"
+  "${ROOT_DIR}/scripts/lab.sh"
+  "${ROOT_DIR}/scripts/test-backup.sh"
+  "${ROOT_DIR}/scripts/test-upgrade-plan.sh"
+  "${ROOT_DIR}/scripts/test-lab.sh"
+  "${ROOT_DIR}/apps/labs/data/compose.yaml"
+  "${ROOT_DIR}/docs/lab-operations.md"
   "${ROOT_DIR}/docs/installation.md"
   "${ROOT_DIR}/docs/architecture.md"
   "${ROOT_DIR}/docs/troubleshooting.md"
@@ -283,6 +291,14 @@ else
   skip "non Apple Silicon host ($(uname -s)/$(uname -m)) — install scripts will refuse"
 fi
 
+section "Lab operations"
+assert_cmd "backup verification rejects altered and unsafe archives" bash "${ROOT_DIR}/scripts/test-backup.sh"
+assert_cmd "upgrade plan reports changes without applying them" bash "${ROOT_DIR}/scripts/test-upgrade-plan.sh"
+assert_cmd "Compose lab targets the selected instance" bash "${ROOT_DIR}/scripts/test-lab.sh"
+assert_cmd "instance flag rejects invalid names" bash -c '! "$1/ducker" --instance "../docker" status' _ "${ROOT_DIR}"
+assert_cmd "instance creation rejects the shared default name" bash -c '! "$1/ducker" instance create docker' _ "${ROOT_DIR}"
+assert_cmd "disk cleanup rejects invalid duration" bash -c '! "$1/ducker" disk prune --older-than 7d' _ "${ROOT_DIR}"
+
 # --- Live (optional) --------------------------------------------------------
 
 section "Live checks (LIVE=${LIVE})"
@@ -296,7 +312,8 @@ else
   else
     pass "instance ${INSTANCE_NAME} is Running"
 
-    export DOCKER_HOST="unix://${HOME}/.lima/${INSTANCE_NAME}/sock/docker.sock"
+    DOCKER_HOST="$(lima_docker_host)"
+    export DOCKER_HOST
     unset DOCKER_CONTEXT || true
 
     if bash "${ROOT_DIR}/scripts/verify.sh"; then
