@@ -28,6 +28,21 @@ ducker verify
 | `manifest.v1+prettyjws is no longer supported`                   | Image too old — pick a maintained one                                      |
 | No Lima instance at all                                          | `ducker install` (doctor will not create one)                              |
 
+## Guest disk I/O errors with low macOS disk space
+
+`ducker diagnose` shows free space on the macOS filesystem holding the Lima disk and
+inside the guest. A sparse Lima disk can run out of backing storage on macOS even
+when the guest reports free space. If guest commands fail with `Input/output error`,
+free space on macOS before restarting Lima. Once the guest is accessible, run
+`limactl shell docker -- sudo systemctl start fstrim.service` to return freed blocks
+from the guest to the host.
+
+`ducker lima` configures hourly trim on new and existing guests. `ducker daemon`
+applies the default builder's 20 GB cache target and 30 GB guest free-space target
+and restarts Docker. Run it when containers can be interrupted. The cache policy
+can evict unused build cache. Running containers, images in use, volumes, and host
+files have their own storage needs.
+
 ## Logs
 
 ```bash

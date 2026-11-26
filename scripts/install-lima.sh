@@ -5,14 +5,12 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
 require_cmd limactl
 require_file "${LIMA_TEMPLATE}"
+trim_config="${ROOT_DIR}/config/fstrim-hourly.conf"
+require_file "${trim_config}"
 
 if lima_running; then
   log "Instance '${INSTANCE_NAME}' already Running — skipping start"
-  limactl list "${INSTANCE_NAME}"
-  exit 0
-fi
-
-if lima_exists; then
+elif lima_exists; then
   log "Starting existing instance '${INSTANCE_NAME}'"
   limactl start --tty=false "${INSTANCE_NAME}"
 else
@@ -22,4 +20,16 @@ fi
 
 limactl list "${INSTANCE_NAME}"
 lima_running || die "Instance '${INSTANCE_NAME}' failed to reach Running state"
+
+# Return freed guest blocks to the host before the sparse disk fills macOS.
+trim_dropin="/etc/systemd/system/fstrim.timer.d/50-docker-lab-hourly.conf"
+if ! limactl shell "${INSTANCE_NAME}" -- cmp -s "${trim_dropin}" - <"${trim_config}"; then
+  log "Installing hourly guest disk trim schedule"
+  limactl shell "${INSTANCE_NAME}" -- sudo install -d -m 0755 "${trim_dropin%/*}"
+  limactl shell "${INSTANCE_NAME}" -- sudo tee "${trim_dropin}" <"${trim_config}" >/dev/null
+  limactl shell "${INSTANCE_NAME}" -- sudo systemctl daemon-reload
+  limactl shell "${INSTANCE_NAME}" -- sudo systemctl enable fstrim.timer
+  limactl shell "${INSTANCE_NAME}" -- sudo systemctl restart fstrim.timer
+fi
+
 log "Lima instance ready"

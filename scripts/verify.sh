@@ -32,7 +32,8 @@ PY
 }
 credential_helper_ok() {
   local store
-  store="$(python3 - "${DOCKER_CONFIG_JSON}" <<'PY'
+  store="$(
+    python3 - "${DOCKER_CONFIG_JSON}" <<'PY'
 import json, sys
 from pathlib import Path
 p = Path(sys.argv[1])
@@ -41,7 +42,7 @@ if not p.exists():
 cfg = json.loads(p.read_text())
 print(cfg.get("credsStore", ""))
 PY
-)"
+  )"
   case "${store}" in
     "" | osxkeychain)
       command -v docker-credential-osxkeychain >/dev/null 2>&1

@@ -16,11 +16,21 @@ printf '  docker:    %s\n' "$(command -v docker >/dev/null && docker --version |
 printf '  DOCKER_HOST=%s\n' "${DOCKER_HOST}"
 printf '  DOCKER_CONTEXT=%s\n' "${DOCKER_CONTEXT:-<unset>}"
 
+section "Host disk space (Lima storage)"
+lima_dir="${LIMA_HOME:-${HOME}/.lima}"
+df -h "${lima_dir}" 2>/dev/null || df -h "${HOME}"
+
 section "Lima"
 if command -v limactl >/dev/null 2>&1; then
   limactl list || true
   if lima_exists; then
     printf '  status: %s\n' "$(lima_status || echo unknown)"
+  fi
+  if lima_running; then
+    echo "  Guest root filesystem and disk trim timer:"
+    limactl shell "${INSTANCE_NAME}" -- df -h / || warn "Guest disk check failed"
+    limactl shell "${INSTANCE_NAME}" -- systemctl list-timers fstrim.timer --no-pager ||
+      warn "Guest trim timer check failed"
   fi
 else
   echo "  limactl not installed"

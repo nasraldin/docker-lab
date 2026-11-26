@@ -129,6 +129,12 @@ section "Static: JSON / markers"
 assert_cmd "config/daemon.json is valid JSON" \
   python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "${ROOT_DIR}/config/daemon.json"
 
+assert_cmd "Docker build cache has an enabled 20 GB target and a 30 GB guest free-space target" \
+  python3 -c 'import json,sys; gc=json.load(open(sys.argv[1]))["builder"]["gc"]; assert gc["enabled"] and gc["defaultMaxUsedSpace"] == "20GB" and gc["defaultMinFreeSpace"] == "30GB"' "${ROOT_DIR}/config/daemon.json"
+
+assert_cmd "Trim timer replaces the weekly schedule and runs hourly without a randomized delay" \
+  bash -c 'diff -u <(printf "[Timer]\nOnCalendar=\nOnCalendar=hourly\nAccuracySec=1min\nRandomizedDelaySec=0\n") "$1"' _ "${ROOT_DIR}/config/fstrim-hourly.conf"
+
 assert_cmd "zshrc.snippet has begin/end markers" \
   bash -c "grep -qF '${MARKER_BEGIN}' '${ROOT_DIR}/config/zshrc.snippet' && grep -qF '${MARKER_END}' '${ROOT_DIR}/config/zshrc.snippet'"
 
