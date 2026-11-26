@@ -33,7 +33,7 @@ fi
 
 DUCKER_COMMANDS=(
   install deps config lima daemon verify doctor diagnose
-  start stop restart status list stats shell
+  start stop restart status list stats shell instance
   ui test self-test test-run benchmark
   upgrade backup restore profile
   vm-uninstall lab-uninstall uninstall uninstall-host purge nuke clean
@@ -71,6 +71,8 @@ Setup:
   benchmark               Disk I/O, pull, and container timings
 
 Lifecycle:
+  --instance NAME         Select a Lima instance for a command
+  instance create|list|context  Manage named Lima instances
   start|stop|restart      Lima VM
   status|list             VM + Docker status
   stats                   Live docker stats + guest summary
@@ -288,6 +290,23 @@ cli_uninstall() {
   [[ "$removed" -eq 1 ]] || echo "==> No global ducker symlink found"
 }
 
+if [[ "${1:-}" == --instance ]]; then
+  [[ $# -ge 3 && "$2" =~ ^[a-z0-9][a-z0-9-]*$ ]] || {
+    echo "Usage: ducker --instance NAME COMMAND [ARGS...]" >&2
+    exit 1
+  }
+  export INSTANCE_NAME="$2"
+  export DOCKER_HOST="unix://${LIMA_HOME:-${HOME}/.lima}/${INSTANCE_NAME}/sock/docker.sock"
+  unset DOCKER_CONTEXT
+  shift 2
+  case "$1" in
+    install | config | deps | doctor | instance | lab-uninstall | uninstall-host | nuke | purge)
+      echo "ERROR: '$1' manages host configuration; use per-instance lifecycle commands" >&2
+      exit 1
+      ;;
+  esac
+fi
+
 CMD="${1:-help}"
 shift || true
 
@@ -303,6 +322,9 @@ case "$CMD" in
     ;;
   doctor)
     run_script doctor.sh "$@"
+    ;;
+  instance)
+    run_script instance.sh "$@"
     ;;
   diagnose)
     run_script diagnose.sh "$@"

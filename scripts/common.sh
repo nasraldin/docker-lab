@@ -8,6 +8,8 @@ ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export ROOT_DIR
 
 INSTANCE_NAME="${INSTANCE_NAME:-docker}"
+LIMA_HOME="${LIMA_HOME:-${HOME}/.lima}"
+export LIMA_HOME
 LIMA_TEMPLATE="${LIMA_TEMPLATE:-${ROOT_DIR}/lima-docker.yaml}"
 DOCKER_CONFIG_JSON="${DOCKER_CONFIG_JSON:-${HOME}/.docker/config.json}"
 ZSHRC_FILE="${ZSHRC_FILE:-${HOME}/.zshrc}"
@@ -61,14 +63,22 @@ require_file() {
   done
 }
 
+valid_instance_name() {
+  [[ "$1" =~ ^[a-z0-9][a-z0-9-]*$ ]]
+}
+
+lima_docker_host() {
+  printf 'unix://%s/%s/sock/docker.sock' "$LIMA_HOME" "$INSTANCE_NAME"
+}
+
 lima_status() {
-  limactl list -q 2>/dev/null | grep -qx "${INSTANCE_NAME}" || return 1
+  limactl list -q 2>/dev/null | grep -Fqx "${INSTANCE_NAME}" || return 1
   limactl list -f '{{.Name}} {{.Status}}' 2>/dev/null |
     awk -v n="${INSTANCE_NAME}" '$1 == n { print $2; exit }'
 }
 
 lima_exists() {
-  limactl list -q 2>/dev/null | grep -qx "${INSTANCE_NAME}"
+  limactl list -q 2>/dev/null | grep -Fqx "${INSTANCE_NAME}"
 }
 
 lima_running() {
