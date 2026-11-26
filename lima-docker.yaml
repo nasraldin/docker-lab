@@ -95,6 +95,10 @@ provision:
     expression: |
       .features.cdi = true |
       .features.containerd-snapshotter = {{.Param.containerdSnapshotter}} |
+      .builder.gc.enabled = true |
+      .builder.gc.defaultReservedSpace = "8GB" |
+      .builder.gc.defaultMaxUsedSpace = "20GB" |
+      .builder.gc.defaultMinFreeSpace = "30GB" |
       .["log-driver"] = "json-file" |
       .["log-opts"]["max-size"] = "10m" |
       .["log-opts"]["max-file"] = "3"

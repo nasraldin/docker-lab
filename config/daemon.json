@@ -3,6 +3,14 @@
     "cdi": true,
     "containerd-snapshotter": true
   },
+  "builder": {
+    "gc": {
+      "enabled": true,
+      "defaultReservedSpace": "8GB",
+      "defaultMaxUsedSpace": "20GB",
+      "defaultMinFreeSpace": "30GB"
+    }
+  },
   "log-driver": "json-file",
   "log-opts": {
     "max-size": "10m",
