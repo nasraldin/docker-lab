@@ -34,7 +34,7 @@ fi
 DUCKER_COMMANDS=(
   install deps config lima daemon verify doctor diagnose disk
   start stop restart status list stats shell instance
-  ui test self-test test-run benchmark
+  ui lab test self-test test-run benchmark
   upgrade backup restore profile
   vm-uninstall lab-uninstall uninstall uninstall-host purge nuke clean
   sync-home-template
@@ -84,6 +84,9 @@ Backup:
   backup [--vm]           Snapshot lab config (optional VM archive)
   backup list             List backups
   restore <id> [--vm]     Restore a backup
+
+Compose labs:
+  lab start|status|stop   PostgreSQL and Redis on the selected instance
 
 Optional UI:
   ui <cmd> [provider]     e.g. ducker ui install dockhand
@@ -362,6 +365,9 @@ case "$CMD" in
     ;;
   list | ls)
     run_make status
+    ;;
+  lab)
+    run_script lab.sh "$@"
     ;;
   ui)
     run_make ui "$@"
