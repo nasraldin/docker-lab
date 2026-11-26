@@ -226,6 +226,7 @@ if (config.get("vmType") != "vz"
 
 test_restore() (
   local archive="$1" source="$2" target="$3" stage guest_disk disk_size boot_script provision
+  local created=false restore_status
   [[ "${target}" =~ ^[a-z0-9][a-z0-9-]*$ ]] || die "Invalid test instance name: ${target}"
   [[ "${target}" != "${INSTANCE_NAME}" && "${target}" != docker && "${target}" != "${source}" ]] ||
     die "Choose a new instance name distinct from the lab and backup instances"
@@ -234,7 +235,18 @@ test_restore() (
 
   mkdir -p "${LIMA_HOME}"
   stage="$(mktemp -d "${LIMA_HOME}/.ducker-restore.XXXXXXXX")"
-  trap 'rm -rf "${stage}"' EXIT
+  trap '
+    restore_status=$?
+    if [[ "${restore_status}" -ne 0 ]]; then
+      if [[ "${created}" == true ]]; then
+        limactl delete --tty=false --force "${target}" ||
+          warn "Could not remove recovery instance ${target} from ${LIMA_HOME}. Remove it through Lima or choose a new name before retrying."
+      elif [[ -e "${LIMA_HOME}/${target}" || -L "${LIMA_HOME}/${target}" ]]; then
+        warn "An instance directory exists at ${LIMA_HOME}/${target}. Check it or choose a new name before retrying."
+      fi
+    fi
+    rm -rf "${stage}"
+  ' EXIT
   # Full restores use the archived configuration. Test restores only import
   # disk data and use a fresh, mount-free Lima configuration.
   extract_vm_archive "${archive}" "${stage}" "${source}"
@@ -273,6 +285,7 @@ ssh:
 networkOpts:
   hostLoopback: false
 YAML
+  created=true
   check_test_instance "${target}" "$boot_script"
   # Keep only the guest's boot disk and EFI variables. Lima creates fresh
   # host-side connections and a new Virtualization.framework identifier.

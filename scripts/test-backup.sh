@@ -62,6 +62,12 @@ cat >"${fixture}/bin/limactl" <<'BASH'
 case "${*}" in
   'list -q') printf 'docker\n' ;;
   'list -f {{.Name}} {{.Status}}') printf 'docker Stopped\n' ;;
+  'create --tty=false --name=recovery '*)
+    mkdir "${LIMA_HOME}/recovery"
+    cat >"${LIMA_HOME}/recovery/lima.yaml"
+    ;;
+  'list -f {{json .Config}} recovery') printf '{"vmType":"vz","mounts":[{}]}\n' ;;
+  'delete --tty=false --force recovery') rm -rf "${LIMA_HOME}/recovery" ;;
   *) printf '%s\n' "$*" >>"${LIMA_HOME}/unexpected-call"; exit 1 ;;
 esac
 BASH
@@ -84,6 +90,17 @@ fi
 [[ "${result}" == *'distinct from the lab and backup instances'* ]] || fail "default instance failed unexpectedly: ${result}"
 [[ ! -f "${LIMA_HOME}/unexpected-call" ]] || fail 'test restore tried to mutate an existing Lima instance'
 [[ "$(cat "${LIMA_TEMPLATE}")" == 'local changes' ]] || fail 'test restore modified lab config'
+
+for attempt in 1 2; do
+  if result="$(bash "${scripts}/restore.sh" "${id}" --vm --into recovery 2>&1)"; then
+    fail "rehearsal attempt ${attempt} accepted unsafe configuration"
+  fi
+  [[ "${result}" == *'Lima settings would expose host resources'* ]] ||
+    fail "rehearsal attempt ${attempt} failed unexpectedly: ${result}"
+  [[ ! -e "${LIMA_HOME}/recovery" ]] || fail 'failed rehearsal left the recovery VM registered'
+done
+[[ ! -f "${LIMA_HOME}/unexpected-call" ]] || fail 'failed rehearsal ran an unexpected Lima command'
+[[ -f "${LIMA_HOME}/docker/disk" ]] || fail 'failed rehearsal touched the source VM'
 
 printf 'changed\n' >>"${BACKUP_ROOT}/${id}/lima-docker.tar.gz"
 if bash "${scripts}/backup.sh" verify "${id}" >/dev/null 2>&1; then

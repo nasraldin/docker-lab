@@ -47,12 +47,47 @@ on_lima_docker() {
   env -u DOCKER_HOST -u DOCKER_CONTEXT docker --host "$(lima_docker_host)" "$@"
 }
 
+preview_build_cache() {
+  local socket cache
+  require_cmd curl python3
+  socket="$(lima_docker_host)"
+  # Buildx du rounds last-use times and drops the until cutoff. The versioned
+  # Engine endpoint returns complete cache records from the same daemon.
+  cache="$(curl --disable --fail --silent --show-error --noproxy '*' \
+    --unix-socket "${socket#unix://}" 'http://localhost/v1.44/system/df?type=build-cache')" ||
+    die "Could not read build cache for '$INSTANCE_NAME'"
+  python3 -c '
+import json
+import re
+import sys
+from datetime import datetime, timedelta, timezone
+
+duration = sys.argv[1]
+seconds = int(duration[:-1]) * {"h": 3600, "m": 60, "s": 1}[duration[-1]]
+if seconds > 9_223_372_036:
+    sys.exit("Cache age is too large.")
+cutoff = datetime.now(timezone.utc) - timedelta(seconds=seconds)
+
+print("ID\tSIZE (BYTES)\tLAST USED")
+for record in json.load(sys.stdin)["BuildCache"] or []:
+    if record["InUse"] or record["Shared"] or record["Type"] in {"internal", "frontend"}:
+        continue
+    last_used = record["LastUsedAt"]
+    if last_used is not None:
+        # Docker can return nanoseconds. Older macOS Python accepts six decimal places.
+        timestamp = re.sub(r"\.(\d+)", lambda match: "." + match[1][:6].ljust(6, "0"), last_used)
+        if datetime.fromisoformat(timestamp.replace("Z", "+00:00")) > cutoff:
+            continue
+    print("{}\t{}\t{}".format(record["ID"], record["Size"], last_used or "never"))
+  ' "$1" <<<"$cache"
+}
+
 prune() {
   local older_than=168h apply=false
   while (($#)); do
     case "$1" in
       --older-than)
-        [[ $# -ge 2 && "$2" =~ ^[1-9][0-9]*[hms]$ ]] || die "Use a duration such as 24h or 30m"
+        [[ $# -ge 2 && "$2" =~ ^[1-9][0-9]{0,9}[hms]$ ]] || die "Use a duration such as 24h or 30m"
         older_than="$2"
         shift
         ;;
@@ -63,10 +98,9 @@ prune() {
   done
   lima_running || die "Start Lima instance '$INSTANCE_NAME' first"
   log "Unused BuildKit cache for '$INSTANCE_NAME', last used over $older_than ago"
-  local -a filters=(--filter "until=$older_than" --filter "inuse!=true")
-  on_lima_docker buildx du --builder default "${filters[@]}"
+  preview_build_cache "$older_than"
   if [[ "$apply" == true ]]; then
-    on_lima_docker buildx prune --builder default "${filters[@]}" --force
+    on_lima_docker buildx prune --builder default --filter "until=$older_than" --force
     limactl shell "$INSTANCE_NAME" -- sudo systemctl start fstrim.service
   else
     log "Preview only. Repeat with --apply to remove matching build cache and trim the guest disk."

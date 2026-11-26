@@ -17,7 +17,7 @@ ducker disk prune
 ducker disk prune --older-than 24h --apply
 ```
 
-The first command previews unused BuildKit cache older than seven days. The second applies a 24-hour cutoff and trims the guest filesystem after pruning. Use the same cutoff for preview and apply to compare the candidates. Cache in use is excluded.
+The first command previews reclaimable BuildKit cache last used more than seven days ago, including cache that has never been used. The second applies a 24-hour cutoff and trims the guest filesystem after pruning. Use the same cutoff for preview and apply to compare the candidates. Cache eligibility can change between runs.
 
 ## Preview upgrades
 
@@ -57,7 +57,7 @@ ducker backup verify BACKUP_ID
 ducker --instance work-dev restore BACKUP_ID --vm --into work-recovery
 ```
 
-A VM backup is taken with the source stopped. Verification checks the archived files and their recorded checksums. Restoring into a new name boots a separate recovery VM and verifies that its Docker daemon responds inside the guest. The recovery VM starts without host mounts or a forwarded Docker socket. Use `limactl shell work-recovery` to inspect recovered files and volumes, then stop the rehearsal VM when done.
+A VM backup is taken with the source stopped. Verification checks the archived files and their recorded checksums. Restoring into a new name boots a separate recovery VM and verifies that its Docker daemon responds inside the guest. The recovery VM starts without host mounts or a forwarded Docker socket. Use `limactl shell work-recovery` to inspect recovered files and volumes, then stop the rehearsal VM when done. If validation fails, the command attempts to remove the rehearsal instance and tells you if it remains.
 
 ## PostgreSQL and Redis
 

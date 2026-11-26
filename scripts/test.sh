@@ -77,6 +77,8 @@ REQUIRED_FILES=(
   "${ROOT_DIR}/scripts/disk.sh"
   "${ROOT_DIR}/scripts/lab.sh"
   "${ROOT_DIR}/scripts/test-backup.sh"
+  "${ROOT_DIR}/scripts/test-disk.sh"
+  "${ROOT_DIR}/scripts/test-uninstall.sh"
   "${ROOT_DIR}/scripts/test-upgrade-plan.sh"
   "${ROOT_DIR}/scripts/test-lab.sh"
   "${ROOT_DIR}/apps/labs/data/compose.yaml"
@@ -297,6 +299,8 @@ assert_cmd "upgrade plan reports changes without applying them" bash "${ROOT_DIR
 assert_cmd "Compose lab targets the selected instance" bash "${ROOT_DIR}/scripts/test-lab.sh"
 assert_cmd "instance flag rejects invalid names" bash -c '! "$1/ducker" --instance "../docker" status' _ "${ROOT_DIR}"
 assert_cmd "instance creation rejects the shared default name" bash -c '! "$1/ducker" instance create docker' _ "${ROOT_DIR}"
+assert_cmd "disk preview honors cache eligibility and age" bash "${ROOT_DIR}/scripts/test-disk.sh"
+assert_cmd "uninstall stays within the selected Lima home" bash "${ROOT_DIR}/scripts/test-uninstall.sh"
 assert_cmd "disk cleanup rejects invalid duration" bash -c '! "$1/ducker" disk prune --older-than 7d' _ "${ROOT_DIR}"
 
 # --- Live (optional) --------------------------------------------------------
